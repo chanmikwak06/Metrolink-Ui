@@ -24,13 +24,16 @@ function copy(text, set) {
   navigator.clipboard?.writeText(text).then(() => { set(text); setTimeout(() => set(null), 1200); }, () => {});
 }
 
-const Badge = ({ proposed }) => html`<span class=${`sg-badge ${proposed ? 'is-proposed' : ''}`}>${proposed ? 'Proposed' : 'Figma style'}</span>`;
+const Badge = ({ t }) => {
+  const [cls, label] = t.proposed ? ['is-proposed', 'Proposed'] : t.local ? ['is-local', 'Local style'] : ['', 'Library style'];
+  return html`<span class=${`sg-badge ${cls}`}>${label}</span>`;
+};
 
 function Colors() {
   const [copied, setCopied] = useState(null);
   const groupNames = { primary: 'Primary', neutral: 'Neutral', text: 'Text', accent: 'Accent', label: 'Labels', border: 'Borders', ui: 'System UI', line: 'Route lines' };
   return html`
-    <p class="sg-lede">Named <b>Figma style</b> colors come from your library. <b>Proposed</b> ones were raw hex values on the canvas with no style; the names are suggestions. Click a swatch to copy its CSS variable.</p>
+    <p class="sg-lede"><b>Library style</b> colors come from your shared Figma library. <b>Local style</b> colors were raw hex values on the canvas and now exist as styles in this Figma file. Click a swatch to copy its CSS variable.</p>
     ${Object.entries(color).map(([group, entries]) => html`
       <h3 key=${group} class="sg-h3">${groupNames[group] || group}</h3>
       <div class="sg-swatches">
@@ -44,7 +47,7 @@ function Colors() {
                 <code>${copied === `var(${cssVar})` ? 'Copied!' : cssVar}</code>
                 <span class="sg-swatch__hex">${t.value}</span>
                 <span class="sg-swatch__usage">${t.usage}</span>
-                <${Badge} proposed=${t.proposed} />
+                <${Badge} t=${t} />
               </span>
             </button>`;
         })}
@@ -53,7 +56,7 @@ function Colors() {
 
 function Typography() {
   return html`
-    <p class="sg-lede">Anta for UI, Helvetica Neue for long-form copy. Letter spacing is Figma's percentage of font size. Use the class (<code>.t-body-m</code>) or the variables (<code>font: var(--type-body-m)</code>).</p>
+    <p class="sg-lede">Anta for UI, Helvetica Neue for long-form copy. Letter spacing is Figma's percentage of font size. Use the class (<code>.t-body-m</code>) or the variables (<code>font: var(--type-body-m)</code>). The three Helvetica Neue styles are still <b>Proposed</b>: Figma couldn't load that font when the styles were created.</p>
     <div class="sg-type">
       ${Object.entries(type).map(([name, t]) => html`
         <div key=${name} class="sg-type__row">
@@ -62,7 +65,7 @@ function Typography() {
             <code>.t-${name}</code>
             <span>${t.family} · ${t.size}/${t.line} · ${t.tracking}%</span>
             <span class="sg-swatch__usage">${t.usage}</span>
-            <${Badge} proposed=${t.proposed} />
+            <${Badge} t=${t} />
           </div>
           <div class=${`sg-type__sample t-${name}`}>${t.sample}</div>
         </div>`)}
@@ -234,7 +237,7 @@ const Flows = () => html`
   </tbody></table>`;
 
 const AUDIT = [
-  ['Colors and text styles', 'Only some colors use library styles (Primary/Main, Neutral/xO, accents/yellow…). 7 route colors, the placeholder/option grays and the nav label gray are raw hex. Proposed names are listed above.'],
+  ['Colors and text styles', 'Only some colors used library styles. 17 color styles and 7 Anta text styles were added to this file as local styles (Oct 28, 2026), but existing layers still use raw values until you apply the styles to them. The 3 Helvetica Neue paragraph styles still need creating in Figma desktop, where the font is available.'],
   ['Bottom nav is inconsistent', 'Inactive labels are rgba(72,76,82,0.7) on Home, #484C52 on most screens, and black for Schedules/Tickets on others. The code uses one value: Text/Nav Inactive #484C52.'],
   ['Duplicate Listbox sets', 'Listbox Component exists 3× on the page (4683:7544, 7643, 7743), each with 10 variants named Variant2–Variant10. Suggest one set with named props: State=Default/Open, Filled=true/false.'],
   ['"Body/Bold/S" is not bold', 'The style uses Anta Regular (Anta has one weight). Consider renaming it to Body/Regular/S.'],

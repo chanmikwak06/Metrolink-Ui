@@ -23,6 +23,7 @@ body.sg { background: #F7F8FA; color: #1d1f22; font: 14px/1.5 system-ui, -apple-
 
 .sg-badge { align-self: flex-start; padding: 1px 7px; border-radius: 99px; font-size: 11px; background: #e7eefb; color: var(--color-primary-main); }
 .sg-badge.is-proposed { background: #fff4d6; color: #8a6100; }
+.sg-badge.is-local { background: #e3f4e6; color: #1f6b2c; }
 
 .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
 .sg-swatch { display: flex; flex-direction: column; overflow: hidden; background: #fff; border: 1px solid #e3e6ea; border-radius: 10px; }
