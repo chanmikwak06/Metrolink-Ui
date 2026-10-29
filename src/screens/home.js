@@ -1,4 +1,4 @@
-import { html, useState, asset, cx } from '../lib.js';
+import { html, useState, useEffect, asset, cx } from '../lib.js';
 import { useApp } from '../store.js';
 import { stations, ticketTypes, lineStatus, serviceAlerts } from '../data.js';
 import { at, Listbox, Button, InfoButton, CloseButton, StatusCard, LineRibbon } from '../components.js';
@@ -19,9 +19,12 @@ export function TripForm({ y, withType = true, cta = 'Buy Tickets', onSubmit, ga
 }
 
 // Figma: Home Page (4683:6974) → 0.1-h-z1.1 (7068, map zoomed on train A584) → 7178 (form filled).
+// Picking Anaheim (A584's next stop) as From or To zooms the map onto the train; another station zooms back out.
 export function Home() {
   const { go, trip, update } = useApp();
-  const [zoomed, setZoomed] = useState(false);
+  const atAnaheim = trip.from === 'Anaheim' || trip.to === 'Anaheim';
+  const [zoomed, setZoomed] = useState(atAnaheim);
+  useEffect(() => setZoomed(atAnaheim), [atAnaheim]);
   const toggleTrain = () => {
     setZoomed(z => !z);
     if (!zoomed && !trip.from) update({ from: 'Anaheim' }); // Figma 7068 pre-selects the train's next stop

@@ -208,7 +208,7 @@ const Assets = () => html`
 
 // What each screen links to: Figma links you made, plus gaps filled in code (marked "added").
 const FLOWS = [
-  ['home', 'Train pin → map zooms to A584 and From = Anaheim (Smart Animate)', 'Info → Why no date picker', 'Buy Tickets (From, To, Type set) → Choose fare', 'Service Alerts → Service Alerts'],
+  ['home', 'Train pin → map zooms to A584 and From = Anaheim (Smart Animate)', 'Pick Anaheim as From or To → map zooms to A584; another station zooms back out', 'Info → Why no date picker', 'Buy Tickets (From, To, Type set) → Choose fare', 'Service Alerts → Service Alerts'],
   ['explanation', 'X → back to the previous screen (added: Figma always went Home)'],
   ['alerts', 'X → back'],
   ['tickets', 'Ticket Wallet → Ticket Wallet', 'Mon-Fri / Sat / Sun radios', 'Buy Tickets → Choose fare'],
