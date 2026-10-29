@@ -9,7 +9,7 @@
 
 export const color = {
   primary: {
-    main: { value: '#0049BA', figma: 'Primary/Main', usage: 'Primary buttons, active tab, links, headings' },
+    main: { value: '#0049BA', figma: 'Primary/Main', usage: 'Primary buttons, active tab icon + label, links, headings' },
     pressed: { value: '#003F8F', figma: 'Primary/Pressed', usage: 'Pressed / confirm button (Go to Ticket Wallet)' },
   },
   neutral: {
@@ -25,7 +25,7 @@ export const color = {
   text: {
     placeholder: { value: '#666666', figma: 'Text/Placeholder', local: true, usage: 'Listbox placeholder + selected value' },
     option: { value: '#333333', figma: 'Text/Option', local: true, usage: 'Dropdown option text' },
-    nav: { value: '#484C52', figma: 'Text/Nav Inactive', local: true, usage: 'Inactive tab label' },
+    nav: { value: '#484C52', figma: 'Text/Nav Inactive', local: true, usage: 'Inactive tab icon + label' },
     muted: { value: '#515151', figma: 'Text/Muted', local: true, usage: 'Explore labels' },
     ticket: { value: '#5268AC', figma: 'Text/Ticket', local: true, usage: 'Price on ticket artwork' },
   },
@@ -33,7 +33,7 @@ export const color = {
     yellow: { value: '#FFCC00', figma: 'accents/yellow', usage: 'Service Alerts button' },
   },
   label: {
-    primary: { value: '#000000', figma: 'labels/primary', usage: 'Text on yellow, icons' },
+    primary: { value: '#000000', figma: 'labels/primary', usage: 'Text on yellow' },
   },
   border: {
     grey: { value: '#D9D9D9', figma: 'Grey', usage: 'Payment method tile border' },

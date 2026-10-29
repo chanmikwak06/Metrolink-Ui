@@ -69,7 +69,7 @@ export function ApplePaySheet() {
   return html`
     <button class="screen applepay" onClick=${() => replace('success')} aria-label="Double click to pay">
       <div class="applepay__sheet"><img src=${asset('tickets/applepay-sheet.png')} alt="" /></div>
-      <span class="applepay__merchant" />
+      <span class="applepay__merchant"><img src=${asset('tickets/applepay-merchant-logo.svg')} alt="Metrolink" /></span>
       <div class="applepay__top" />
       <div class="applepay__confirm"><img src=${asset('tickets/applepay-sheet.png')} alt="" /></div>
     </button>`;
@@ -80,6 +80,9 @@ export function Success() {
   const { replace } = useApp();
   return html`
     <div class="screen">
+      <svg class="success__check" style=${at(185, 299)} width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M7 16.5l6.5 6.5L25 10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
       <div class="success" style=${at(40, 355, { width: 323 })}>
         <h2 class="t-heading-m text-primary">Transaction Successful</h2>
         <p>Please activate your ticket just<br />before boarding.</p>

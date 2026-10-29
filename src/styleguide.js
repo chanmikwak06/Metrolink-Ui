@@ -198,7 +198,7 @@ const ASSETS = {
   Navigation: ['nav/home.svg', 'nav/tickets.svg', 'nav/schedules.svg', 'nav/map.svg', 'nav/explore.svg', 'nav/indicator.svg'],
   Common: ['common/status-bar.svg', 'common/back.svg', 'common/chevron-down.svg', 'common/chevron-down-alt.svg', 'common/arrow-down.svg', 'common/close.svg', 'common/info.svg', 'common/radio-off.svg', 'common/radio-on.svg', 'common/line-orange.svg', 'common/line-green.svg', 'common/line-purple.svg', 'common/line-blue.svg'],
   'Home & Map': ['home/schedules-title.svg', 'home/pin-a584.svg', 'home/pin-a584-large.svg', 'map/pin.svg', 'map/pin-zoom-b.svg', 'home/map.png'],
-  Tickets: ['tickets/visa.svg', 'tickets/mastercard.svg', 'tickets/paypal.svg', 'tickets/applepay-mark.svg', 'tickets/ticket.png', 'tickets/applepay-sheet.png'],
+  Tickets: ['tickets/visa.svg', 'tickets/mastercard.svg', 'tickets/paypal.svg', 'tickets/applepay-mark.svg', 'tickets/applepay-merchant-logo.svg', 'tickets/ticket.png', 'tickets/applepay-sheet.png'],
   'Schedules & Explore': ['schedules/schedules-title.svg', 'schedules/line-orange-sm.svg', 'schedules/arrow-right.svg', 'explore/carousel-arrows.svg', 'explore/den-1.png', 'explore/muse-1.png'],
 };
 
@@ -219,7 +219,7 @@ const FLOWS = [
   ['validity', 'Back → Choose fare (added)', 'Accept & Continue → Payment'],
   ['payment', 'Back → Ticket Validity (added)', 'Payment tiles selectable (added)', 'Buy with Apple Pay → Apple Pay'],
   ['applepay', 'Tap anywhere → Transaction Successful'],
-  ['success', 'Go to Ticket Wallet → Ticket Wallet'],
+  ['success', 'Primary blue check above the headline (added)', 'Go to Ticket Wallet → Ticket Wallet'],
   ['wallet', 'Ticket → full-screen ticket'],
   ['ticket', 'Back or tap the ticket → Ticket Wallet (Back added)'],
   ['schedules', 'Radios + From/To → Get Schedule → results', 'Info → Why no date picker'],
@@ -243,14 +243,14 @@ const Flows = () => html`
 
 const AUDIT = [
   ['Colors and text styles', 'Only some colors used library styles. 17 color styles and 7 Anta text styles were added to this file as local styles (Oct 28, 2026), but existing layers still use raw values until you apply the styles to them. The 3 Helvetica Neue paragraph styles still need creating in Figma desktop, where the font is available.'],
-  ['Bottom nav is inconsistent', 'Inactive labels are rgba(72,76,82,0.7) on Home, #484C52 on most screens, and black for Schedules/Tickets on others. The code uses one value: Text/Nav Inactive #484C52.'],
+  ['Bottom nav colors unified', 'Was: inactive labels in three grays and inactive icons in black. Now (Oct 29, 2026), in every Figma frame and in code, icons and labels use Text/Nav Inactive #484C52 when inactive and Primary/Main #0049BA when active. The Schedules icon is the new train + clock (4918:2335).'],
   ['Duplicate Listbox sets', 'Listbox Component exists 3× on the page (4683:7544, 7643, 7743), each with 10 variants named Variant2–Variant10. Suggest one set with named props: State=Default/Open, Filled=true/false.'],
   ['"Body/Bold/S" is not bold', 'The style uses Anta Regular (Anta has one weight). Consider renaming it to Body/Regular/S.'],
   ['Typo', 'Ticket Validity button reads "Accept & Contiinue"; the code says "Accept & Continue".'],
   ['Schedule times', 'Results show "12:20 AM" and "1:36 AM" after 11:36 AM; probably meant PM. Kept as drawn in data.js.'],
   ['Static Apple Pay sheet', 'The sheet is a screenshot, so it always shows $10.00 even for a $5 fare. The ticket price patch in the wallet does update.'],
   ['Unused frames', '"Home Page_OC Line" (4683:7281) is hidden and "Explore_1" (4683:6630) has no links into it. Neither is in the prototype.'],
-  ['Logos removed', 'The Metrolink logo is gone from all 24 screens and the Apple Pay merchant tile (Oct 28, 2026). The METROLINK wordmark on the ticket art (Figma 4899:2261) is kept on purpose. Payment marks (Visa, Mastercard, PayPal, Apple Pay) are kept.'],
+  ['Logos removed', 'The Metrolink logo is gone from the top-left of all 24 screens (Oct 28, 2026). The small Metrolink mark in the Apple Pay merchant tile was restored (Oct 29). The METROLINK wordmark on the ticket art (Figma 4899:2261) is kept on purpose. Payment marks (Visa, Mastercard, PayPal, Apple Pay) are kept.'],
   ['Timed auto-advance', 'Figma auto-filled forms after 5.6–7s delays (Tickets, Schedules, Home zoom). The code uses real dropdowns instead.'],
 ];
 

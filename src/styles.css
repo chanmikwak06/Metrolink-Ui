@@ -47,7 +47,8 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 .bottom-nav::before { content: ''; position: absolute; inset: 0; background: var(--color-neutral-2o); border-radius: var(--radius-lg); }
 .bottom-nav__list { position: relative; display: flex; gap: 32px; height: 57.2px; padding: 12px 12px 0; background: var(--color-neutral-1o); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .bottom-nav__item { flex: 1 0 0; min-width: 1px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 45px; color: var(--color-text-nav); font: var(--type-body-s); letter-spacing: var(--type-body-s-tracking); white-space: nowrap; }
-.bottom-nav__item .icon-mask { background-color: var(--color-label-primary); }
+/* Icons and labels share one colour per state: Text/Nav Inactive when inactive, Primary/Main when active. */
+.bottom-nav__item .icon-mask { background-color: var(--color-text-nav); }
 .bottom-nav__item.is-active { color: var(--color-primary-main); cursor: default; }
 .bottom-nav__item.is-active .icon-mask { background-color: var(--color-primary-main); }
 .bottom-nav__indicator { position: relative; height: 29.8px; background: var(--color-neutral-1o); }
@@ -91,7 +92,7 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 
 .status-card { position: absolute; width: 282px; height: 48px; background: var(--color-neutral-1o); border: 1px solid var(--color-neutral-5o); border-radius: var(--radius-sm); color: var(--color-neutral-7o); }
 .status-card__name { position: absolute; left: 54px; top: 6px; width: 160px; font: var(--type-body-m); letter-spacing: var(--type-body-m-tracking); white-space: nowrap; }
-.status-card__status { position: absolute; left: 55px; top: 25px; height: 13px; overflow: hidden; font: var(--type-caption-s); line-height: 20px; letter-spacing: var(--type-caption-s-tracking); white-space: nowrap; }
+.status-card__status { position: absolute; left: 55px; top: 28.5px; font: var(--type-caption-s); letter-spacing: var(--type-caption-s-tracking); white-space: nowrap; }
 .status-card__train { position: absolute; left: 228px; top: 13px; font: var(--type-body-m); letter-spacing: var(--type-body-m-tracking); }
 
 .chevron-row { display: flex; align-items: center; height: 20px; color: var(--color-neutral-10o); font: var(--type-body-m); letter-spacing: var(--type-body-m-tracking); white-space: nowrap; }
@@ -144,6 +145,7 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 /* ---------- Tickets ---------- */
 .success { position: absolute; text-align: center; font: var(--type-paragraph); font-family: 'Anta', sans-serif; letter-spacing: -.096px; color: #000; }
 .success h2 { margin-bottom: 24px; font-weight: 400; }
+.success__check { color: var(--color-primary-main); }
 
 /* The ticket art carries its own cut-corner shape (transparent outside the card), so the box adds no outline or rounding. */
 .ticket { position: absolute; width: 216px; height: 378px; overflow: hidden; }
@@ -158,7 +160,8 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 .applepay__sheet img, .applepay__confirm img { position: absolute; left: -.02%; width: 99.8%; }
 .applepay__sheet img { top: -.55%; height: 110.1%; }
 .applepay__merchant { position: absolute; left: 37px; top: 244px; width: 36px; height: 33px; background: var(--color-neutral-1o); border-radius: 7px; }
-.applepay__merchant img { position: absolute; left: 0; top: 11px; width: 33.33px; height: 11.763px; }
+/* Centred on the icon box drawn in the sheet image (32,238 → 74,278), not on this white patch. */
+.applepay__merchant img { position: absolute; left: -.67px; top: 8.12px; width: 33.33px; height: 11.763px; }
 .applepay__top { position: absolute; left: 0; top: 0; width: 402px; height: 209px; background: var(--color-ui-apple-pay-sheet); }
 .applepay__confirm { position: absolute; left: 0; top: 472px; width: 402px; height: 89px; overflow: hidden; }
 .applepay__confirm img { top: -869.99%; height: 974.82%; }

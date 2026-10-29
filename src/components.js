@@ -13,7 +13,7 @@ export const StatusBar = ({ style }) => html`<img class="status-bar" src=${asset
 const TABS = [
   { id: 'home', label: 'Home', icon: 'nav/home.svg', w: 25, h: 23 },
   { id: 'tickets', label: 'Tickets', icon: 'nav/tickets.svg', w: 15.465, h: 23.197 },
-  { id: 'schedules', label: 'Schedules', icon: 'nav/schedules.svg', w: 19.331, h: 23.197 },
+  { id: 'schedules', label: 'Schedules', icon: 'nav/schedules.svg', w: 23.197, h: 23.197 },
   { id: 'map', label: 'Map', icon: 'nav/map.svg', w: 23.197, h: 23.197 },
   { id: 'explore', label: 'Explore', icon: 'nav/explore.svg', w: 23, h: 23 },
 ];
