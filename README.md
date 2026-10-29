@@ -47,7 +47,7 @@ The prototype follows your Figma links. Where Figma had gaps, these were filled 
 
 - Dropdowns are real: pick any station or ticket type. Buy Tickets / Get Schedule enable once the form is complete.
   Figma's timed auto-fills (5.6–7 s delays) are replaced by this.
-- On Home, picking Anaheim (From or To) zooms the map onto train A584; picking L.A. Union Station as To pans it to Los Angeles; any other station zooms back out.
+- On Home, picking Anaheim (From or To) zooms the map onto Anaheim; picking L.A. Union Station as To pans it to Los Angeles; any other station zooms back out. The A584 pin scales with the map instead of jumping to the large Figma size.
 - Every fare row is tappable, and the chosen price carries through to Payment and the ticket.
 - Close (X) returns to the previous screen instead of always going Home.
 - Payment method tiles are selectable.

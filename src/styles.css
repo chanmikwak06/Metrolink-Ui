@@ -107,20 +107,15 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 /* ---------- Home ---------- */
 .home-map { position: sticky; top: 0; height: 422px; margin-bottom: -27px; overflow: hidden; z-index: 0; }
 .home-map__img { position: absolute; left: -143.04px; top: 0; width: 853.5px; height: 436px; transform-origin: 0 0; transition: transform var(--motion-slow) var(--ease-slow); }
-.home-map.is-zoomed .home-map__img { transform: translate(-702.61px, -375.6px) scale(2.5634); }
+/* Zoomed views use one scale (2.5634) and centre their station at (201, 200): Anaheim here, Union Station in .is-la. */
+.home-map.is-zoomed .home-map__img { transform: translate(-825.4px, -366.5px) scale(2.5634); }
 .home-map__pin { position: absolute; left: 264px; top: 128px; width: 40.305px; height: 60.458px; transform-origin: 50% 100%; transform: translate(13.55px, 31.64px) scale(.2821); transition: transform var(--motion-slow) var(--ease-slow); }
 .home-map__pin::after { content: ''; position: absolute; inset: -50px; }
-.home-map.is-zoomed .home-map__pin { transform: none; }
+/* The pin grows only as much as the map does (.2821 × 2.5634), so it stays the size of the pins printed on the map. */
+.home-map.is-zoomed .home-map__pin { transform: translate(-122.65px, 8.99px) scale(.7231); }
 .home-map.is-zoomed .home-map__pin::after { inset: -6px; }
-/* LA view: same scale as the Anaheim zoom, panned so Union Station sits at the map's centre (201, 200).
-   The A584 pin is shifted by the same amount so it stays on its spot near Anaheim. */
 .home-map.is-la .home-map__img { transform: translate(-638.3px, -245.3px) scale(2.5634); }
-.home-map.is-la .home-map__pin { transform: translate(64.45px, 130.19px); }
-/* Second A584 pin (orange outline) over the small one printed in the map at Union Station.
-   Its box sits where it rests in the LA view; the other views move and scale it like the green pin. */
-.home-map__pin.home-map__pin--la { left: 180.85px; top: 139.54px; pointer-events: none; transform: translate(39.16px, -26.3px) scale(.2821); }
-.home-map.is-zoomed .home-map__pin--la { transform: translate(-64.35px, -130.34px); }
-.home-map.is-la .home-map__pin--la { transform: none; }
+.home-map.is-la .home-map__pin { transform: translate(64.45px, 130.19px) scale(.7231); }
 .home-map__pin img { width: 100%; height: 100%; }
 .home-map__pin span { position: absolute; left: 5.43px; top: 14.73px; font: 10.851px/15.5px 'Anta', sans-serif; letter-spacing: -.065px; color: var(--color-neutral-1o); }
 .home-panel { position: relative; height: 858px; background: var(--color-neutral-1o); z-index: 1; }

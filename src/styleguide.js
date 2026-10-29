@@ -194,7 +194,7 @@ function Components() {
 const ASSETS = {
   Navigation: ['nav/home.svg', 'nav/tickets.svg', 'nav/schedules.svg', 'nav/map.svg', 'nav/explore.svg', 'nav/indicator.svg'],
   Common: ['common/status-bar.svg', 'common/chevron-down.svg', 'common/chevron-down-alt.svg', 'common/arrow-down.svg', 'common/close.svg', 'common/info.svg', 'common/radio-off.svg', 'common/radio-on.svg', 'common/line-orange.svg', 'common/line-green.svg', 'common/line-purple.svg', 'common/line-blue.svg'],
-  'Home & Map': ['home/schedules-title.svg', 'home/pin-a584.svg', 'home/pin-a584-large.svg', 'home/pin-a584-la.svg', 'map/pin.svg', 'map/pin-zoom-b.svg', 'home/map.png'],
+  'Home & Map': ['home/schedules-title.svg', 'home/pin-a584.svg', 'home/pin-a584-large.svg', 'map/pin.svg', 'map/pin-zoom-b.svg', 'home/map.png'],
   Tickets: ['tickets/visa.svg', 'tickets/mastercard.svg', 'tickets/paypal.svg', 'tickets/applepay-mark.svg', 'tickets/ticket.png', 'tickets/applepay-sheet.png'],
   'Schedules & Explore': ['schedules/schedules-title.svg', 'schedules/line-orange-sm.svg', 'schedules/arrow-right.svg', 'explore/carousel-arrows.svg', 'explore/den-1.png', 'explore/muse-1.png'],
 };
@@ -208,7 +208,7 @@ const Assets = () => html`
 
 // What each screen links to: Figma links you made, plus gaps filled in code (marked "added").
 const FLOWS = [
-  ['home', 'Train pin → map zooms to A584 and From = Anaheim (Smart Animate)', 'Pick Anaheim as From or To → map zooms to A584; another station zooms back out', 'Pick L.A. Union Station as To → map pans/zooms to Los Angeles (same zoom as Anaheim, so it is a smooth pan)', 'Info → Why no date picker', 'Buy Tickets (From, To, Type set) → Choose fare', 'Service Alerts → Service Alerts'],
+  ['home', 'Train pin → map zooms to A584 and From = Anaheim (Smart Animate)', 'Pick Anaheim as From or To → map zooms to Anaheim; another station zooms back out', 'Pick L.A. Union Station as To → map pans/zooms to Los Angeles (same zoom as Anaheim, so it is a smooth pan)', 'Info → Why no date picker', 'Buy Tickets (From, To, Type set) → Choose fare', 'Service Alerts → Service Alerts'],
   ['explanation', 'X → back to the previous screen (added: Figma always went Home)'],
   ['alerts', 'X → back'],
   ['tickets', 'Ticket Wallet → Ticket Wallet', 'Mon-Fri / Sat / Sun radios', 'Buy Tickets → Choose fare'],
