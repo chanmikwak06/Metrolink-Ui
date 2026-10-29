@@ -1,7 +1,7 @@
 import { html, asset } from '../lib.js';
 import { useApp } from '../store.js';
 import { days, trips } from '../data.js';
-import { at, Logo, InfoButton, CloseButton, RadioGroup, LineRibbon } from '../components.js';
+import { at, InfoButton, CloseButton, RadioGroup, LineRibbon } from '../components.js';
 import { TripForm } from './home.js';
 
 // Figma: Schedules (4683:7341 empty → 7395 filled)
@@ -9,7 +9,6 @@ export function Schedules() {
   const { go, trip, update } = useApp();
   return html`
     <div class="screen">
-      <${Logo} />
       <img src=${asset('schedules/schedules-title.svg')} alt="Schedules" width="57.54" height="8.274" style=${at(60, 220)} />
       <${InfoButton} onClick=${() => go('explanation')} style=${at(297, 208)} />
       <${RadioGroup} options=${days} value=${trip.day} onChange=${v => update({ day: v })} positions=${[61, 185, 283]} top=${274} />
@@ -22,7 +21,6 @@ export function ScheduleResults() {
   const { back, trip } = useApp();
   return html`
     <div class="screen">
-      <${Logo} />
       <${CloseButton} onClick=${back} />
       <h2 class="t-heading-l text-secondary" style=${at(39, 131)}>${trip.day || 'Mon-Fri'}</h2>
       ${trips.map((t, i) => html`

@@ -3,7 +3,7 @@
 import { createRoot } from 'react-dom/client';
 import { html, useState, asset, setAssetBase } from './lib.js';
 import { applyTokens, color, type, radius, space, shadow, motion } from './tokens.js';
-import { Button, ApplePayButton, Listbox, RadioGroup, BottomNav, StatusCard, ChevronRow, PaymentTile, LineRibbon, CloseButton, InfoButton, Logo } from './components.js';
+import { Button, ApplePayButton, Listbox, RadioGroup, BottomNav, StatusCard, ChevronRow, PaymentTile, LineRibbon, CloseButton, InfoButton, StatusBar } from './components.js';
 import { stations, ticketTypes, days, lineStatus, lines } from './data.js';
 import { screens } from './screens/index.js';
 
@@ -154,6 +154,9 @@ function Components() {
           <${RadioGroup} options=${days} value=${day} onChange=${setDay} positions=${[0, 124, 222]} top=${0} />
         </div>
       <//>
+      <${Demo} title="Status Bar" figma="StatusBar (local set) · Dark Mode=False, Dynamic Island=False" note="Transparent: no fill, so the screen shows through. Pinned to the top of every screen; it never scrolls." code="<StatusBar />">
+        <div class="sg-phone-strip sg-phone-strip--status"><${StatusBar} /></div>
+      <//>
       <${Demo} title="Bottom Nav" figma="Menu Bar / Home_Menu bar → Bottom Nav" note="Active tab: Primary/Main icon + label, 56×2 indicator." code="<BottomNav active='home' />">
         <div class="sg-phone-strip"><${BottomNav} active=${tab} onSelect=${setTab} /></div>
       <//>
@@ -179,11 +182,10 @@ function Components() {
           <${LineRibbon} line="orangeCounty" small />
         </div>
       <//>
-      <${Demo} title="Close · Info · Logo" figma="Frame 1 (X) · Vector (Stroke) · Union">
+      <${Demo} title="Close · Info" figma="Frame 1 (X) · Vector (Stroke)">
         <div class="sg-row">
           <div style=${{ position: 'relative', width: 46, height: 44 }}><div style=${{ position: 'absolute', left: -333, top: -75 }}><${CloseButton} onClick=${() => {}} /></div></div>
           <div style=${{ position: 'relative', width: 35, height: 35 }}><${InfoButton} onClick=${() => {}} style=${{ left: 0, top: 0 }} /></div>
-          <div style=${{ position: 'relative', width: 73, height: 26 }}><${Logo} style=${{ left: 0, top: 0 }} /></div>
         </div>
       <//>
     </div>`;
@@ -191,9 +193,9 @@ function Components() {
 
 const ASSETS = {
   Navigation: ['nav/home.svg', 'nav/tickets.svg', 'nav/schedules.svg', 'nav/map.svg', 'nav/explore.svg', 'nav/indicator.svg'],
-  Common: ['common/logo.svg', 'common/chevron-down.svg', 'common/chevron-down-alt.svg', 'common/arrow-down.svg', 'common/close.svg', 'common/info.svg', 'common/radio-off.svg', 'common/radio-on.svg', 'common/line-orange.svg', 'common/line-green.svg', 'common/line-purple.svg', 'common/line-blue.svg'],
+  Common: ['common/status-bar.svg', 'common/chevron-down.svg', 'common/chevron-down-alt.svg', 'common/arrow-down.svg', 'common/close.svg', 'common/info.svg', 'common/radio-off.svg', 'common/radio-on.svg', 'common/line-orange.svg', 'common/line-green.svg', 'common/line-purple.svg', 'common/line-blue.svg'],
   'Home & Map': ['home/schedules-title.svg', 'home/pin-a584.svg', 'home/pin-a584-large.svg', 'map/pin.svg', 'map/pin-zoom-b.svg', 'home/map.png'],
-  Tickets: ['tickets/visa.svg', 'tickets/mastercard.svg', 'tickets/paypal.svg', 'tickets/applepay-mark.svg', 'tickets/applepay-merchant-logo.svg', 'tickets/ticket.png', 'tickets/applepay-sheet.png'],
+  Tickets: ['tickets/visa.svg', 'tickets/mastercard.svg', 'tickets/paypal.svg', 'tickets/applepay-mark.svg', 'tickets/ticket.png', 'tickets/applepay-sheet.png'],
   'Schedules & Explore': ['schedules/schedules-title.svg', 'schedules/line-orange-sm.svg', 'schedules/arrow-right.svg', 'explore/carousel-arrows.svg', 'explore/den-1.png', 'explore/muse-1.png'],
 };
 
@@ -245,6 +247,7 @@ const AUDIT = [
   ['Schedule times', 'Results show "12:20 AM" and "1:36 AM" after 11:36 AM; probably meant PM. Kept as drawn in data.js.'],
   ['Static Apple Pay sheet', 'The sheet is a screenshot, so it always shows $10.00 even for a $5 fare. The ticket price patch in the wallet does update.'],
   ['Unused frames', '"Home Page_OC Line" (4683:7281) is hidden and "Explore_1" (4683:6630) has no links into it. Neither is in the prototype.'],
+  ['Logos removed', 'The Metrolink logo is gone from all 24 screens, the Apple Pay merchant tile and the ticket wordmark (Oct 28, 2026). On the ticket, the wordmark is baked into the image, so Figma has a Neutral/4O "Wordmark cover" rectangle over it; the code uses an edited ticket.png. Payment marks (Visa, Mastercard, PayPal, Apple Pay) are kept.'],
   ['Timed auto-advance', 'Figma auto-filled forms after 5.6–7s delays (Tickets, Schedules, Home zoom). The code uses real dropdowns instead.'],
 ];
 
@@ -268,7 +271,7 @@ function StyleGuide() {
   return html`
     <div class="sg-shell">
       <aside class="sg-nav">
-        <div class="sg-nav__brand"><img src=${asset('common/logo.svg')} alt="" width="73" height="26" /><span>Mobile Intro<br /><small>Style guide</small></span></div>
+        <div class="sg-nav__brand"><span>Mobile Intro<br /><small>Style guide</small></span></div>
         <nav>${SECTIONS.map(([id, label]) => html`<a key=${id} href=${`#${id}`}>${label}</a>`)}</nav>
         <div class="sg-nav__foot">
           <a href="../">Open prototype →</a>

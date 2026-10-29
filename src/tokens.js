@@ -82,8 +82,7 @@ export const radius = {
 export const space = {
   gutter: { value: 39, usage: 'Screen side margin (content screens)' },
   'form-gutter': { value: 61, usage: 'Screen side margin (forms)' },
-  'logo-x': { value: 22, usage: 'Logo left offset' },
-  'logo-y': { value: 23, usage: 'Logo top offset' },
+  'status-h': { value: 48, usage: 'Status bar height (transparent, pinned to the top)' },
   'row': { value: 60, usage: 'Fare list row pitch' },
   'nav-h': { value: 88, usage: 'Bottom nav height' },
 };

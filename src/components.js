@@ -6,8 +6,8 @@ import { lines } from './data.js';
 
 export const at = (left, top, extra) => ({ position: 'absolute', left, top, ...extra });
 
-// Figma: "Union" (logo, top-left of every screen)
-export const Logo = ({ style }) => html`<img class="logo" src=${asset('common/logo.svg')} alt="Home" style=${style} />`;
+// Figma: "StatusBar" (iOS, light, no Dynamic Island). Transparent, pinned to the top of every screen.
+export const StatusBar = ({ style }) => html`<img class="status-bar" src=${asset('common/status-bar.svg')} alt="" style=${style} />`;
 
 // Figma: "Menu Bar" / "Home_Menu bar" → Bottom Nav + Menu List + Iphone Indicator
 const TABS = [

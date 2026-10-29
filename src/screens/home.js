@@ -1,7 +1,7 @@
 import { html, useState, asset, cx } from '../lib.js';
 import { useApp } from '../store.js';
 import { stations, ticketTypes, lineStatus, serviceAlerts } from '../data.js';
-import { at, Logo, Listbox, Button, InfoButton, CloseButton, StatusCard, LineRibbon } from '../components.js';
+import { at, Listbox, Button, InfoButton, CloseButton, StatusCard, LineRibbon } from '../components.js';
 
 // Shared trip form (Figma: From / To / Ticket Type listboxes + Buy Tickets).
 // `y` = top of the From field in screen coordinates; spacing matches the Figma frames.
@@ -34,7 +34,6 @@ export function Home() {
           <img src=${asset('home/pin-a584-large.svg')} alt="" />
           <span>A584</span>
         </button>
-        <${Logo} />
       </div>
 
       <div class="home-panel">
@@ -62,7 +61,6 @@ export function Explanation() {
   const { back } = useApp();
   return html`
     <div class="screen" style=${{ height: 1311 }}>
-      <${Logo} />
       <${CloseButton} onClick=${back} />
       <${Paragraphs} className="paragraph" blocks=${[
         ['On the ', 'Metrolink mobile app', ', there is no explicit ', 'day selection interface', ' (such as a calendar picker) when purchasing tickets. Instead, the app is structured around a ', 'ticket-first workflow', ', where users select their ', 'origin, destination, and ticket type,', ' rather than a specific travel date.'],
@@ -82,7 +80,6 @@ export function ServiceAlerts() {
   const tops = [188, 696, 1203];
   return html`
     <div class="screen" style=${{ height: 1733 }}>
-      <${Logo} />
       <${CloseButton} onClick=${back} />
       ${serviceAlerts.map((a, i) => html`
         <section key=${a.train} class="alert" style=${at(39, tops[i], { width: 324 })}>

@@ -61,6 +61,7 @@ body.sg { background: #F7F8FA; color: #1d1f22; font: 14px/1.5 system-ui, -apple-
 .sg-row--top { align-items: flex-start; }
 .sg-col { display: flex; flex-direction: column; gap: 10px; }
 .sg-phone-strip { position: relative; width: 402px; height: 87px; margin: 0 -4px; }
+.sg-phone-strip--status { height: 48px; background: repeating-conic-gradient(#eef0f3 0 25%, #fff 0 50%) 0 0 / 12px 12px; }
 .sg-figure { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: #6b7076; }
 
 .sg-assets { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }

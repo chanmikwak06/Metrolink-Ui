@@ -1,7 +1,7 @@
 import { html, useState, useRef, asset, cx } from '../lib.js';
 import { useApp } from '../store.js';
 import { trainStatus } from '../data.js';
-import { at, Logo, CloseButton, LineRibbon } from '../components.js';
+import { at, CloseButton, LineRibbon } from '../components.js';
 
 // Thin road strokes drawn over the zoomed map in Figma (Map 4683:6852, Vectors 17–22).
 const ROUTES = [
@@ -36,7 +36,6 @@ export function MapScreen() {
         <span>A584</span>
       </button>
       <div class="map__nav-backing" />
-      <${Logo} />
     </div>`;
 }
 
@@ -46,7 +45,6 @@ export function TrainStatus() {
   const s = trainStatus;
   return html`
     <div class="screen">
-      <${Logo} />
       <${CloseButton} onClick=${back} />
       <header style=${at(39, 184, { width: 324, height: 41 })}>
         <${LineRibbon} line=${s.line} style=${at(0, 6)} />

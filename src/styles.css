@@ -33,7 +33,7 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 @keyframes screen-in { from { opacity: 0; } }
 
 .screen { position: relative; display: block; width: 402px; height: 874px; background: var(--color-neutral-1o); overflow: hidden; }
-.logo { position: absolute; left: var(--space-logo-x); top: var(--space-logo-y); width: 73px; height: 25.763px; z-index: 2; }
+.status-bar { position: absolute; left: 0; top: 0; width: 402px; height: var(--space-status-h); z-index: 40; pointer-events: none; }
 .frame-coords { position: absolute; inset: 0; pointer-events: none; }
 .frame-coords > * { pointer-events: auto; }
 

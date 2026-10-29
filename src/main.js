@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import { html, useEffect, useRef, useState } from './lib.js';
 import { applyTokens } from './tokens.js';
 import { AppProvider, useApp } from './store.js';
-import { BottomNav } from './components.js';
+import { BottomNav, StatusBar } from './components.js';
 import { screens } from './screens/index.js';
 
 const FIGMA_FILE = 'https://www.figma.com/design/FZu2fhf5iZXyAokFbFM3ec/Mobile_Intro-Ui';
@@ -20,6 +20,7 @@ function Phone() {
       <div class="device__scroll" ref=${scroller}>
         <div class="screen-enter" key=${current}><${Screen} /></div>
       </div>
+      <${StatusBar} />
       <${BottomNav} active=${screen.tab} />
     </div>`;
 }

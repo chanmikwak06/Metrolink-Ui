@@ -1,7 +1,7 @@
 import { html, useRef, asset } from '../lib.js';
 import { useApp } from '../store.js';
 import { lines, places } from '../data.js';
-import { at, Logo, Button } from '../components.js';
+import { at, Button } from '../components.js';
 
 const ORDER = ['antelopeValley', 'orangeCounty', 'sanBernardino', 'perrisValley', 'inlandEmpire', 'riverside', 'venturaCounty'];
 const ROW_Y = [171, 299, 431, 561, 691, 822, 953];
@@ -11,7 +11,6 @@ export function Explore() {
   const { go } = useApp();
   return html`
     <div class="screen" style=${{ height: 1120 }}>
-      <${Logo} />
       ${ORDER.map((id, i) => {
         const open = id === 'orangeCounty' ? () => go('explore-region') : null;
         return html`
@@ -44,7 +43,6 @@ export function ExploreRegion() {
   const getSchedule = place => { update({ to: place.station }); tab('home'); };
   return html`
     <div class="screen" style=${{ height: 1598 }}>
-      <${Logo} />
       <span class="t-body-m text-muted" style=${at(null, 58, { right: 20 })}>Orange County</span>
       ${places.map((p, i) => html`
         <section key=${p.name} class="place" style=${at(20, tops[i], { width: 362 })}>
