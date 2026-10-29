@@ -26,7 +26,7 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 }
 
 /* ---------- Device ---------- */
-.device { position: relative; width: 402px; height: 874px; overflow: hidden; background: var(--color-neutral-1o); border-radius: 48px; box-shadow: 0 0 0 10px #1d1f22, 0 30px 60px rgba(0,0,0,.25); transform: scale(var(--scale)); transform-origin: 0 0; font: var(--type-body-m); letter-spacing: var(--type-body-m-tracking); color: var(--color-neutral-10o); }
+.device { position: relative; width: 402px; height: 874px; overflow: hidden; background: var(--color-neutral-1o); border-radius: 48px; box-shadow: 0 0 0 10px #000, 0 30px 60px rgba(0,0,0,.25); transform: scale(var(--scale)); transform-origin: 0 0; font: var(--type-body-m); letter-spacing: var(--type-body-m-tracking); color: var(--color-neutral-10o); }
 .device__scroll { position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
 .device__scroll::-webkit-scrollbar { display: none; }
 .screen-enter { animation: screen-in var(--motion-base) var(--ease-base); }
@@ -112,6 +112,15 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 .home-map__pin::after { content: ''; position: absolute; inset: -50px; }
 .home-map.is-zoomed .home-map__pin { transform: none; }
 .home-map.is-zoomed .home-map__pin::after { inset: -6px; }
+/* LA view: same scale as the Anaheim zoom, panned so Union Station sits at the map's centre (201, 200).
+   The A584 pin is shifted by the same amount so it stays on its spot near Anaheim. */
+.home-map.is-la .home-map__img { transform: translate(-638.3px, -245.3px) scale(2.5634); }
+.home-map.is-la .home-map__pin { transform: translate(64.45px, 130.19px); }
+/* Second A584 pin (orange outline) over the small one printed in the map at Union Station.
+   Its box sits where it rests in the LA view; the other views move and scale it like the green pin. */
+.home-map__pin.home-map__pin--la { left: 180.85px; top: 139.54px; pointer-events: none; transform: translate(39.16px, -26.3px) scale(.2821); }
+.home-map.is-zoomed .home-map__pin--la { transform: translate(-64.35px, -130.34px); }
+.home-map.is-la .home-map__pin--la { transform: none; }
 .home-map__pin img { width: 100%; height: 100%; }
 .home-map__pin span { position: absolute; left: 5.43px; top: 14.73px; font: 10.851px/15.5px 'Anta', sans-serif; letter-spacing: -.065px; color: var(--color-neutral-1o); }
 .home-panel { position: relative; height: 858px; background: var(--color-neutral-1o); z-index: 1; }
@@ -139,11 +148,12 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 .success { position: absolute; text-align: center; font: var(--type-paragraph); font-family: 'Anta', sans-serif; letter-spacing: -.096px; color: #000; }
 .success h2 { margin-bottom: 24px; font-weight: 400; }
 
-.ticket { position: absolute; width: 216px; height: 378px; border: .5px solid var(--color-border-ticket); border-radius: var(--radius-ticket) 0 var(--radius-ticket) 0; overflow: hidden; }
-.ticket img { position: absolute; left: -1.39%; top: -.32%; width: 101.85%; height: 100.38%; }
-.ticket__price { position: absolute; left: 57.5px; top: 187.5px; width: 40px; height: 18px; padding-left: 2px; background: var(--color-neutral-4o); color: var(--color-text-ticket); font: 11px/18px 'Anta', sans-serif; letter-spacing: -.066px; white-space: nowrap; }
+/* The ticket art carries its own cut-corner shape (transparent outside the card), so the box adds no outline or rounding. */
+.ticket { position: absolute; width: 216px; height: 378px; overflow: hidden; }
+.ticket img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.ticket__price { position: absolute; left: 53.9px; top: 187.5px; width: 40px; height: 18px; padding-left: 2px; background: var(--color-neutral-4o); color: var(--color-text-ticket); font: 11px/18px 'Anta', sans-serif; letter-spacing: -.066px; white-space: nowrap; }
 .ticket--lg { left: 57.62px; top: 61.92px; width: 406.38px; height: 711.16px; border: 0; border-radius: 119.11px 0 119.11px 0; }
-.ticket__price--lg { left: 109.12px; top: 353.7px; width: 75.26px; height: 33.87px; padding-left: 3.8px; font-size: 20.47px; line-height: 33.87px; letter-spacing: -.12px; }
+.ticket__price--lg { left: 102.5px; top: 353.7px; width: 75.26px; height: 33.87px; padding-left: 3.8px; font-size: 20.47px; line-height: 33.87px; letter-spacing: -.12px; }
 .ticket-detail__mask { position: absolute; background: var(--color-neutral-4o); pointer-events: none; }
 
 .applepay { width: 402px; padding: 0; text-align: initial; }

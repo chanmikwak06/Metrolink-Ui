@@ -37,7 +37,7 @@ export const color = {
   },
   border: {
     grey: { value: '#D9D9D9', figma: 'Grey', usage: 'Payment method tile border' },
-    ticket: { value: '#B8B8B8', figma: 'Border/Ticket', local: true, usage: 'Ticket card outline' },
+    ticket: { value: '#B8B8B8', figma: 'Border/Ticket', local: true, usage: 'Old ticket outline (unused since the new ticket art)' },
   },
   ui: {
     homeIndicator: { value: '#B9C0C9', figma: 'UI/Home Indicator', local: true, usage: 'iOS home indicator bar' },
@@ -75,7 +75,7 @@ export const radius = {
   sm: { value: 6, usage: 'Buttons, status cards, payment tiles' },
   md: { value: 8, usage: 'Listbox, dropdown, Apple Pay button' },
   lg: { value: 24, usage: 'Bottom nav' },
-  ticket: { value: 64, usage: 'Ticket card (top-left + bottom-right only)' },
+  ticket: { value: 64, usage: 'Old ticket card corners (unused since the new ticket art)' },
   pill: { value: 100, usage: 'Home indicator' },
 };
 

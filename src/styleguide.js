@@ -194,7 +194,7 @@ function Components() {
 const ASSETS = {
   Navigation: ['nav/home.svg', 'nav/tickets.svg', 'nav/schedules.svg', 'nav/map.svg', 'nav/explore.svg', 'nav/indicator.svg'],
   Common: ['common/status-bar.svg', 'common/chevron-down.svg', 'common/chevron-down-alt.svg', 'common/arrow-down.svg', 'common/close.svg', 'common/info.svg', 'common/radio-off.svg', 'common/radio-on.svg', 'common/line-orange.svg', 'common/line-green.svg', 'common/line-purple.svg', 'common/line-blue.svg'],
-  'Home & Map': ['home/schedules-title.svg', 'home/pin-a584.svg', 'home/pin-a584-large.svg', 'map/pin.svg', 'map/pin-zoom-b.svg', 'home/map.png'],
+  'Home & Map': ['home/schedules-title.svg', 'home/pin-a584.svg', 'home/pin-a584-large.svg', 'home/pin-a584-la.svg', 'map/pin.svg', 'map/pin-zoom-b.svg', 'home/map.png'],
   Tickets: ['tickets/visa.svg', 'tickets/mastercard.svg', 'tickets/paypal.svg', 'tickets/applepay-mark.svg', 'tickets/ticket.png', 'tickets/applepay-sheet.png'],
   'Schedules & Explore': ['schedules/schedules-title.svg', 'schedules/line-orange-sm.svg', 'schedules/arrow-right.svg', 'explore/carousel-arrows.svg', 'explore/den-1.png', 'explore/muse-1.png'],
 };
@@ -208,7 +208,7 @@ const Assets = () => html`
 
 // What each screen links to: Figma links you made, plus gaps filled in code (marked "added").
 const FLOWS = [
-  ['home', 'Train pin → map zooms to A584 and From = Anaheim (Smart Animate)', 'Pick Anaheim as From or To → map zooms to A584; another station zooms back out', 'Info → Why no date picker', 'Buy Tickets (From, To, Type set) → Choose fare', 'Service Alerts → Service Alerts'],
+  ['home', 'Train pin → map zooms to A584 and From = Anaheim (Smart Animate)', 'Pick Anaheim as From or To → map zooms to A584; another station zooms back out', 'Pick L.A. Union Station as To → map pans/zooms to Los Angeles (same zoom as Anaheim, so it is a smooth pan)', 'Info → Why no date picker', 'Buy Tickets (From, To, Type set) → Choose fare', 'Service Alerts → Service Alerts'],
   ['explanation', 'X → back to the previous screen (added: Figma always went Home)'],
   ['alerts', 'X → back'],
   ['tickets', 'Ticket Wallet → Ticket Wallet', 'Mon-Fri / Sat / Sun radios', 'Buy Tickets → Choose fare'],
@@ -247,7 +247,7 @@ const AUDIT = [
   ['Schedule times', 'Results show "12:20 AM" and "1:36 AM" after 11:36 AM; probably meant PM. Kept as drawn in data.js.'],
   ['Static Apple Pay sheet', 'The sheet is a screenshot, so it always shows $10.00 even for a $5 fare. The ticket price patch in the wallet does update.'],
   ['Unused frames', '"Home Page_OC Line" (4683:7281) is hidden and "Explore_1" (4683:6630) has no links into it. Neither is in the prototype.'],
-  ['Logos removed', 'The Metrolink logo is gone from all 24 screens, the Apple Pay merchant tile and the ticket wordmark (Oct 28, 2026). On the ticket, the wordmark is baked into the image, so Figma has a Neutral/4O "Wordmark cover" rectangle over it; the code uses an edited ticket.png. Payment marks (Visa, Mastercard, PayPal, Apple Pay) are kept.'],
+  ['Logos removed', 'The Metrolink logo is gone from all 24 screens and the Apple Pay merchant tile (Oct 28, 2026). The METROLINK wordmark on the ticket art (Figma 4899:2261) is kept on purpose. Payment marks (Visa, Mastercard, PayPal, Apple Pay) are kept.'],
   ['Timed auto-advance', 'Figma auto-filled forms after 5.6–7s delays (Tickets, Schedules, Home zoom). The code uses real dropdowns instead.'],
 ];
 

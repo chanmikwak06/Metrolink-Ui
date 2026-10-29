@@ -19,24 +19,33 @@ export function TripForm({ y, withType = true, cta = 'Buy Tickets', onSubmit, ga
 }
 
 // Figma: Home Page (4683:6974) → 0.1-h-z1.1 (7068, map zoomed on train A584) → 7178 (form filled).
-// Picking Anaheim (A584's next stop) as From or To zooms the map onto the train; another station zooms back out.
+// The map follows the form: To = L.A. Union Station zooms onto Los Angeles; Anaheim (A584's next stop)
+// as From or To zooms onto the train; anything else zooms back out. Anaheim ↔ LA share one zoom level,
+// so switching between them is a straight pan.
+const mapViewFor = trip => (trip.to === 'L.A. Union Station' ? 'la'
+  : trip.from === 'Anaheim' || trip.to === 'Anaheim' ? 'anaheim' : null);
+
 export function Home() {
   const { go, trip, update } = useApp();
-  const atAnaheim = trip.from === 'Anaheim' || trip.to === 'Anaheim';
-  const [zoomed, setZoomed] = useState(atAnaheim);
-  useEffect(() => setZoomed(atAnaheim), [atAnaheim]);
+  const target = mapViewFor(trip);
+  const [view, setView] = useState(target);
+  useEffect(() => setView(target), [target]);
   const toggleTrain = () => {
-    setZoomed(z => !z);
-    if (!zoomed && !trip.from) update({ from: 'Anaheim' }); // Figma 7068 pre-selects the train's next stop
+    setView(v => (v ? null : 'anaheim'));
+    if (!view && !trip.from) update({ from: 'Anaheim' }); // Figma 7068 pre-selects the train's next stop
   };
   return html`
     <div class="screen" style=${{ height: 1253 }}>
-      <div class=${cx('home-map', zoomed && 'is-zoomed')}>
+      <div class=${cx('home-map', view && 'is-zoomed', view === 'la' && 'is-la')}>
         <img class="home-map__img" src=${asset('home/map.png')} alt="Metrolink system map" />
         <button class="home-map__pin" onClick=${toggleTrain} aria-label="Train A584">
           <img src=${asset('home/pin-a584-large.svg')} alt="" />
           <span>A584</span>
         </button>
+        <span class="home-map__pin home-map__pin--la" aria-hidden="true">
+          <img src=${asset('home/pin-a584-la.svg')} alt="" />
+          <span>A584</span>
+        </span>
       </div>
 
       <div class="home-panel">
