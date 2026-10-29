@@ -47,9 +47,12 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 .bottom-nav::before { content: ''; position: absolute; inset: 0; background: var(--color-neutral-2o); border-radius: var(--radius-lg); }
 .bottom-nav__list { position: relative; display: flex; gap: 32px; height: 57.2px; padding: 12px 12px 0; background: var(--color-neutral-1o); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
 .bottom-nav__item { flex: 1 0 0; min-width: 1px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 45px; color: var(--color-text-nav); font: var(--type-body-s); letter-spacing: var(--type-body-s-tracking); white-space: nowrap; }
-/* Icons and labels share one colour per state: Text/Nav Inactive when inactive, Primary/Main when active. */
-.bottom-nav__item .icon-mask { background-color: var(--color-text-nav); }
+/* Inactive: icons Icon/Nav Inactive (#404040, the Schedules icon gray), labels Text/Nav Inactive.
+   Active: icon and label Primary/Main (the Home icon blue). */
+.bottom-nav__item .icon-mask { background-color: var(--color-icon-nav-inactive); }
 .bottom-nav__item.is-active { color: var(--color-primary-main); cursor: default; }
+/* The blue underline already marks the current tab; skip the generic focus box here. */
+.bottom-nav__item:focus-visible { outline: none; }
 .bottom-nav__item.is-active .icon-mask { background-color: var(--color-primary-main); }
 .bottom-nav__indicator { position: relative; height: 29.8px; background: var(--color-neutral-1o); }
 .bottom-nav__indicator span { position: absolute; left: 50%; bottom: 8px; width: 135px; height: 5px; border-radius: var(--radius-pill); background: var(--color-ui-home-indicator); transform: translateX(-50%); }

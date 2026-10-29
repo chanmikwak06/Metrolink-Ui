@@ -54,6 +54,6 @@ The prototype follows your Figma links. Where Figma had gaps, these were filled 
 - Payment method tiles are selectable.
 - Schedule results show the day and stations you picked.
 - Explore → Get Schedule opens Home with **To = Santa Ana**.
-- Tab bar icons and labels use `--color-text-nav` (#484C52) when inactive and `--color-primary-main` when active, in Figma too.
+- Tab bar: inactive icons use `--color-icon-nav-inactive` (#404040), inactive labels `--color-text-nav` (#484C52), and the active icon + label `--color-primary-main`, in Figma too.
 - "Accept & Contiinue" typo is fixed.
 - Apple Pay sheet is the static screenshot from Figma, so it always reads $10.00.

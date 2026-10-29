@@ -31,7 +31,7 @@ const Badge = ({ t }) => {
 
 function Colors() {
   const [copied, setCopied] = useState(null);
-  const groupNames = { primary: 'Primary', neutral: 'Neutral', text: 'Text', accent: 'Accent', label: 'Labels', border: 'Borders', ui: 'System UI', line: 'Route lines' };
+  const groupNames = { primary: 'Primary', neutral: 'Neutral', text: 'Text', icon: 'Icons', accent: 'Accent', label: 'Labels', border: 'Borders', ui: 'System UI', line: 'Route lines' };
   return html`
     <p class="sg-lede"><b>Library style</b> colors come from your shared Figma library. <b>Local style</b> colors were raw hex values on the canvas and now exist as styles in this Figma file. Click a swatch to copy its CSS variable.</p>
     ${Object.entries(color).map(([group, entries]) => html`
@@ -243,7 +243,7 @@ const Flows = () => html`
 
 const AUDIT = [
   ['Colors and text styles', 'Only some colors used library styles. 17 color styles and 7 Anta text styles were added to this file as local styles (Oct 28, 2026), but existing layers still use raw values until you apply the styles to them. The 3 Helvetica Neue paragraph styles still need creating in Figma desktop, where the font is available.'],
-  ['Bottom nav colors unified', 'Was: inactive labels in three grays and inactive icons in black. Now (Oct 29, 2026), in every Figma frame and in code, icons and labels use Text/Nav Inactive #484C52 when inactive and Primary/Main #0049BA when active. The Schedules icon is the new train + clock (4918:2335).'],
+  ['Bottom nav colors unified', 'Was: inactive labels in three grays and inactive icons in black. Now (Oct 29, 2026), in every Figma frame and in code, inactive icons use Icon/Nav Inactive #404040 (the Schedules icon gray) and inactive labels Text/Nav Inactive #484C52; the active icon and label use Primary/Main #0049BA (the Home icon blue). The Schedules icon is the new train + clock (4918:2335).'],
   ['Duplicate Listbox sets', 'Listbox Component exists 3× on the page (4683:7544, 7643, 7743), each with 10 variants named Variant2–Variant10. Suggest one set with named props: State=Default/Open, Filled=true/false.'],
   ['"Body/Bold/S" is not bold', 'The style uses Anta Regular (Anta has one weight). Consider renaming it to Body/Regular/S.'],
   ['Typo', 'Ticket Validity button reads "Accept & Contiinue"; the code says "Accept & Continue".'],
