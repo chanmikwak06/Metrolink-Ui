@@ -6,7 +6,7 @@ import { lines } from './data.js';
 
 export const at = (left, top, extra) => ({ position: 'absolute', left, top, ...extra });
 
-// Figma: "StatusBar" (iOS, light, no Dynamic Island). Transparent, pinned to the top of every screen.
+// Figma: "StatusBar" (iOS, light, no Dynamic Island) + "Notch" (iPhone 13). Transparent, pinned to the top of every screen.
 export const StatusBar = ({ style }) => html`<img class="status-bar" src=${asset('common/status-bar.svg')} alt="" style=${style} />`;
 
 // Figma: "Menu Bar" / "Home_Menu bar" → Bottom Nav + Menu List + Iphone Indicator

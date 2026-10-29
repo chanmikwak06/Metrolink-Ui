@@ -154,7 +154,7 @@ function Components() {
           <${RadioGroup} options=${days} value=${day} onChange=${setDay} positions=${[0, 124, 222]} top=${0} />
         </div>
       <//>
-      <${Demo} title="Status Bar" figma="StatusBar (local set) · Dark Mode=False, Dynamic Island=False" note="Transparent: no fill, so the screen shows through. Pinned to the top of every screen; it never scrolls." code="<StatusBar />">
+      <${Demo} title="Status Bar" figma="StatusBar (library) · Dark Mode=False, Dynamic Island=False + Notch" note="iPhone 13 notch, centered. Transparent: no fill, so the screen shows through. Pinned to the top of every screen; it never scrolls." code="<StatusBar />">
         <div class="sg-phone-strip sg-phone-strip--status"><${StatusBar} /></div>
       <//>
       <${Demo} title="Bottom Nav" figma="Menu Bar / Home_Menu bar → Bottom Nav" note="Active tab: Primary/Main icon + label, 56×2 indicator." code="<BottomNav active='home' />">
