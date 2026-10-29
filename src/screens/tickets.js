@@ -1,7 +1,7 @@
 import { html, asset, cx } from '../lib.js';
 import { useApp } from '../store.js';
 import { days, fares, money } from '../data.js';
-import { at, Button, ApplePayButton, InfoButton, RadioGroup, ChevronRow, PaymentTile } from '../components.js';
+import { at, Button, ApplePayButton, InfoButton, RadioGroup, ChevronRow, PaymentTile, BackButton } from '../components.js';
 import { TripForm } from './home.js';
 
 const fareOf = trip => fares.find(f => f.id === trip.fare) || fares[0];
@@ -22,6 +22,7 @@ export function Fares() {
   const { go, update } = useApp();
   return html`
     <div class="screen">
+      <${BackButton} />
       ${fares.map((f, i) => html`
         <div key=${f.id} style=${at(27, 204 + i * 60, { width: 345, height: 44 })}>
           <${InfoButton} onClick=${() => go('explanation')} style=${at(0, 4)} />
@@ -36,6 +37,7 @@ export function Validity() {
   const { go } = useApp();
   return html`
     <div class="screen">
+      <${BackButton} />
       <h2 class="t-title-m text-primary" style=${at(39, 216)}>Ticket Validity</h2>
       <div class="paragraph paragraph--s" style=${at(39, 266, { width: 329 })}>
         <p>On the <b>Metrolink mobile app</b>, there is no explicit <b>day selection interface</b> (such as a calendar picker or multi-day selector) when purchasing tickets. Instead, the app is structured around a <b>ticket-first workflow</b>, where users select their <b>origin, destination, and ticket type,</b> rather than a specific travel date.</p>
@@ -52,6 +54,7 @@ export function Payment() {
   const tiles = [['visa', 39, 73], ['mastercard', 122, 74], ['paypal', 206, 74], ['applepay', 290, 73]];
   return html`
     <div class="screen">
+      <${BackButton} />
       <div class="t-body-m row-between" style=${at(39, 216, { width: 323 })}><span>Total</span><span>${money(fare.price)}</span></div>
       <${ChevronRow} style=${at(39, 324, { width: 323 })} chevronX=${318}>Add New Card<//>
       ${tiles.map(([m, x, w]) => html`<${PaymentTile} key=${m} method=${m} selected=${trip.payment === m}
@@ -114,5 +117,6 @@ export function TicketDetail() {
       <div class="ticket-detail__mask" style=${at(293, 714, { width: 132, height: 59 })} />
       <div class="ticket-detail__mask" style=${at(-1, 750, { width: 403, height: 59 })} />
       <div class="ticket-detail__mask" style=${at(0, -17, { width: 427, height: 124 })} />
+      <${BackButton} />
     </div>`;
 }

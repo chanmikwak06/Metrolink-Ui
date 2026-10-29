@@ -3,7 +3,7 @@
 import { createRoot } from 'react-dom/client';
 import { html, useState, asset, setAssetBase } from './lib.js';
 import { applyTokens, color, type, radius, space, shadow, motion } from './tokens.js';
-import { Button, ApplePayButton, Listbox, RadioGroup, BottomNav, StatusCard, ChevronRow, PaymentTile, LineRibbon, CloseButton, InfoButton, StatusBar } from './components.js';
+import { Button, ApplePayButton, Listbox, RadioGroup, BottomNav, StatusCard, ChevronRow, PaymentTile, LineRibbon, CloseButton, InfoButton, StatusBar, BackButton } from './components.js';
 import { stations, ticketTypes, days, lineStatus, lines } from './data.js';
 import { screens } from './screens/index.js';
 
@@ -182,8 +182,11 @@ function Components() {
           <${LineRibbon} line="orangeCounty" small />
         </div>
       <//>
-      <${Demo} title="Close · Info" figma="Frame 1 (X) · Vector (Stroke)">
+      <${Demo} title="Back · Close · Info" figma="Back Button (local, Icon/Solid/arrow-left) · Frame 1 (X) · Vector (Stroke)"
+        note="Back sits top-left at 23,75 (46×44 tap area), mirroring Close at 333,75. On Orange County it is at 23,46 to line up with the region label. Back with no history goes to the tab's first screen."
+        code="<BackButton style? />">
         <div class="sg-row">
+          <div style=${{ position: 'relative', width: 46, height: 44 }}><${BackButton} onClick=${() => {}} style=${{ left: 0, top: 0 }} /></div>
           <div style=${{ position: 'relative', width: 46, height: 44 }}><div style=${{ position: 'absolute', left: -333, top: -75 }}><${CloseButton} onClick=${() => {}} /></div></div>
           <div style=${{ position: 'relative', width: 35, height: 35 }}><${InfoButton} onClick=${() => {}} style=${{ left: 0, top: 0 }} /></div>
         </div>
@@ -193,7 +196,7 @@ function Components() {
 
 const ASSETS = {
   Navigation: ['nav/home.svg', 'nav/tickets.svg', 'nav/schedules.svg', 'nav/map.svg', 'nav/explore.svg', 'nav/indicator.svg'],
-  Common: ['common/status-bar.svg', 'common/chevron-down.svg', 'common/chevron-down-alt.svg', 'common/arrow-down.svg', 'common/close.svg', 'common/info.svg', 'common/radio-off.svg', 'common/radio-on.svg', 'common/line-orange.svg', 'common/line-green.svg', 'common/line-purple.svg', 'common/line-blue.svg'],
+  Common: ['common/status-bar.svg', 'common/back.svg', 'common/chevron-down.svg', 'common/chevron-down-alt.svg', 'common/arrow-down.svg', 'common/close.svg', 'common/info.svg', 'common/radio-off.svg', 'common/radio-on.svg', 'common/line-orange.svg', 'common/line-green.svg', 'common/line-purple.svg', 'common/line-blue.svg'],
   'Home & Map': ['home/schedules-title.svg', 'home/pin-a584.svg', 'home/pin-a584-large.svg', 'map/pin.svg', 'map/pin-zoom-b.svg', 'home/map.png'],
   Tickets: ['tickets/visa.svg', 'tickets/mastercard.svg', 'tickets/paypal.svg', 'tickets/applepay-mark.svg', 'tickets/ticket.png', 'tickets/applepay-sheet.png'],
   'Schedules & Explore': ['schedules/schedules-title.svg', 'schedules/line-orange-sm.svg', 'schedules/arrow-right.svg', 'explore/carousel-arrows.svg', 'explore/den-1.png', 'explore/muse-1.png'],
@@ -212,19 +215,19 @@ const FLOWS = [
   ['explanation', 'X → back to the previous screen (added: Figma always went Home)'],
   ['alerts', 'X → back'],
   ['tickets', 'Ticket Wallet → Ticket Wallet', 'Mon-Fri / Sat / Sun radios', 'Buy Tickets → Choose fare'],
-  ['fares', 'Any fare → Ticket Validity (added: Figma linked Adult only; price carries through)', 'Info → Why no date picker'],
-  ['validity', 'Accept & Continue → Payment'],
-  ['payment', 'Payment tiles selectable (added)', 'Buy with Apple Pay → Apple Pay'],
+  ['fares', 'Back → previous screen (added)', 'Any fare → Ticket Validity (added: Figma linked Adult only; price carries through)', 'Info → Why no date picker'],
+  ['validity', 'Back → Choose fare (added)', 'Accept & Continue → Payment'],
+  ['payment', 'Back → Ticket Validity (added)', 'Payment tiles selectable (added)', 'Buy with Apple Pay → Apple Pay'],
   ['applepay', 'Tap anywhere → Transaction Successful'],
   ['success', 'Go to Ticket Wallet → Ticket Wallet'],
   ['wallet', 'Ticket → full-screen ticket'],
-  ['ticket', 'Tap → back to wallet'],
+  ['ticket', 'Back or tap the ticket → Ticket Wallet (Back added)'],
   ['schedules', 'Radios + From/To → Get Schedule → results', 'Info → Why no date picker'],
   ['schedule-results', 'Day + stations reflect your selections (added)', 'X → back'],
   ['map', 'Train pin → zoom (Smart Animate 600ms)', 'Zoomed: drag or tap the pin → Train A584'],
   ['train-status', 'X → back to map'],
   ['explore', 'Orange County → region page (other lines have no page in Figma)'],
-  ['explore-region', 'Photo arrows scroll the carousel', 'Get Schedule → Home with To = Santa Ana (Figma went to a pre-filled Home)'],
+  ['explore-region', 'Back → Explore (added)', 'Photo arrows scroll the carousel', 'Get Schedule → Home with To = Santa Ana (Figma went to a pre-filled Home)'],
 ];
 
 const Flows = () => html`

@@ -94,6 +94,15 @@ export const CloseButton = ({ onClick }) => html`
     <img src=${asset('common/close.svg')} alt="" />
   </button>`;
 
+// Figma: "Back Button" (local component) → Icon/Solid/arrow-left (library). Top-left mirror of the Close button.
+export const BackButton = ({ onClick, style }) => {
+  const app = useApp();
+  return html`
+    <button class="back-btn" onClick=${onClick || app?.back} style=${style} aria-label="Back">
+      <img src=${asset('common/back.svg')} alt="" />
+    </button>`;
+};
+
 // Figma: "Vector (Stroke)" info icon — links to the Ticket Validity explanation.
 export const InfoButton = ({ onClick, style }) => html`
   <button class="info-btn" onClick=${onClick} style=${style} aria-label="Why there is no date picker">

@@ -33,7 +33,9 @@ export function AppProvider({ screens, children }) {
   }, [screens]);
 
   const go = useCallback(id => setStack(s => [...s, id]), []);
-  const back = useCallback(() => setStack(s => (s.length > 1 ? s.slice(0, -1) : s)), []);
+  // With nothing to go back to (screen opened from a link), Back goes to the tab's first screen.
+  const back = useCallback(() => setStack(s => (s.length > 1 ? s.slice(0, -1)
+    : TAB_ROOTS[screens[s[0]].tab] !== s[0] ? [TAB_ROOTS[screens[s[0]].tab]] : s)), [screens]);
   const tab = useCallback(id => setStack([TAB_ROOTS[id]]), []);
   const replace = useCallback(id => setStack(s => [...s.slice(0, -1), id]), []);
   const restart = useCallback(() => { setTrip(initialTrip); setStack(['home']); }, []);

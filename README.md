@@ -50,6 +50,7 @@ The prototype follows your Figma links. Where Figma had gaps, these were filled 
 - On Home, picking Anaheim (From or To) zooms the map onto Anaheim; picking L.A. Union Station as To pans it to Los Angeles; any other station zooms back out. The A584 pin scales with the map instead of jumping to the large Figma size.
 - Every fare row is tappable, and the chosen price carries through to Payment and the ticket.
 - Close (X) returns to the previous screen instead of always going Home.
+- Choose fare, Ticket Validity, Payment, Ticket and Orange County have a Back arrow (top-left), also added to those Figma frames as the local **Back Button** component.
 - Payment method tiles are selectable.
 - Schedule results show the day and stations you picked.
 - Explore → Get Schedule opens Home with **To = Santa Ana**.

@@ -83,6 +83,8 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
 .radio { display: flex; align-items: center; gap: 8px; color: var(--color-neutral-10o); font: var(--type-body-m); letter-spacing: var(--type-body-m-tracking); white-space: nowrap; }
 .close-btn { position: absolute; left: 333px; top: 75px; width: 46px; height: 44px; display: grid; place-items: center; z-index: 3; }
 .close-btn img { width: 15.964px; height: 15.964px; }
+.back-btn { position: absolute; left: 23px; top: 75px; width: 46px; height: 44px; display: grid; place-items: center; z-index: 3; }
+.back-btn img { width: 20px; height: 20px; }
 .info-btn { position: absolute; padding: 12px; line-height: 0; }
 .line-ribbon { width: 30px; height: 14px; }
 .line-ribbon--sm { width: 17px; height: 8px; }
