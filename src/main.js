@@ -6,8 +6,11 @@ import { BottomNav, StatusBar } from './components.js';
 import { screens } from './screens/index.js';
 
 const FIGMA_FILE = 'https://www.figma.com/design/FZu2fhf5iZXyAokFbFM3ec/Mobile_Intro-Ui';
+// ?embed shows only the phone, scaled to fit its frame (for embedding in the portfolio site).
+const EMBED = new URLSearchParams(location.search).has('embed');
 
 applyTokens();
+document.body.classList.toggle('is-embed', EMBED);
 
 function Phone() {
   const { current } = useApp();
@@ -30,12 +33,16 @@ function Viewer() {
   const { current, stack, go, back, restart } = useApp();
   const [scale, setScale] = useState(1);
   useEffect(() => {
-    const fit = () => setScale(Math.min(1, (innerHeight - 40) / 874));
+    // Embedded: fit the phone plus its 10px bezel inside the frame on both axes
+    const fit = () => setScale(EMBED
+      ? Math.min(1, (innerWidth - 24) / 422, (innerHeight - 24) / 894)
+      : Math.min(1, (innerHeight - 40) / 874));
     fit();
     addEventListener('resize', fit);
     return () => removeEventListener('resize', fit);
   }, []);
   const meta = screens[current];
+  if (EMBED) return html`<div class="embed"><div class="viewer__stage" style=${{ '--scale': scale }}><${Phone} /></div></div>`;
   return html`
     <div class="viewer">
       <aside class="viewer__panel">

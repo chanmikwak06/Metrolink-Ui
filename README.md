@@ -18,6 +18,9 @@ python3 serve.py
 Every screen has its own link (e.g. `http://localhost:4173/#/payment`), so you can share a specific step.
 The panel next to the phone has Back, Restart, a screen picker, and a link to each screen's Figma frame.
 
+Add `?embed` (e.g. `http://localhost:4173/?embed#/home`) for the phone alone, scaled to fit its frame on a
+transparent page. The portfolio site embeds the hosted copy: https://chanmikwak06.github.io/Metrolink-Ui/?embed
+
 ## What's where
 
 | File | What it holds |

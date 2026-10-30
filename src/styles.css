@@ -24,6 +24,10 @@ body { background: #E6E8EB; color: #1d1f22; font: 13px/1.45 system-ui, -apple-sy
   .viewer { flex-direction: column; gap: 16px; }
   .viewer__panel { width: 100%; max-width: 402px; }
 }
+/* ?embed: phone only, centered, transparent page so the host's card shows through */
+body.is-embed { background: transparent; min-height: 0; overflow: hidden; }
+.embed { display: grid; place-items: center; height: 100vh; }
+.is-embed .device { box-shadow: 0 0 0 10px #000; }
 
 /* ---------- Device ---------- */
 .device { position: relative; width: 402px; height: 874px; overflow: hidden; background: var(--color-neutral-1o); border-radius: 48px; box-shadow: 0 0 0 10px #000, 0 30px 60px rgba(0,0,0,.25); transform: scale(var(--scale)); transform-origin: 0 0; font: var(--type-body-m); letter-spacing: var(--type-body-m-tracking); color: var(--color-neutral-10o); }
