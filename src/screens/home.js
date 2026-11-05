@@ -1,4 +1,4 @@
-import { html, useState, useEffect, asset, cx } from '../lib.js';
+import { html, useState, useEffect, useRef, asset, cx } from '../lib.js';
 import { useApp } from '../store.js';
 import { stations, ticketTypes, lineStatus, serviceAlerts } from '../data.js';
 import { at, Listbox, Button, InfoButton, CloseButton, StatusCard, LineRibbon } from '../components.js';
@@ -19,26 +19,58 @@ export function TripForm({ y, withType = true, cta = 'Buy Tickets', onSubmit, ga
 }
 
 // Figma: Home Page (4683:6974) → 0.1-h-z1.1 (7068, map zoomed on train A584) → 7178 (form filled).
-// The map follows the form: To = L.A. Union Station zooms onto Los Angeles; Anaheim as From or To
-// zooms onto Anaheim; anything else zooms back out. Anaheim ↔ LA share one zoom level, so switching
+// The map follows the form: picking a From or To station zooms onto that station's dot (the most
+// recent pick wins); clearing both zooms back out. Every station shares one zoom level, so moving
 // between them is a straight pan. The A584 pin scales with the map, never larger.
-const mapViewFor = trip => (trip.to === 'L.A. Union Station' ? 'la'
-  : trip.from === 'Anaheim' || trip.to === 'Anaheim' ? 'anaheim' : null);
+const MAP = { left: -143.04, width: 853.5, height: 436, viewport: [402, 422], scale: 2.5634, center: [201, 200] };
+const PIN = { anchor: [284.15, 188.46], at: [440.7, 220.1], scale: 0.2821 }; // A584 sits at Buena Park
+// Station dots on home/map.png, in px of the 853.5px-wide map (source px ÷ 3.0767)
+const STATION_XY = {
+  'Anaheim': [456.2, 221.0], 'Anaheim Canyon': [475.8, 225.5], 'Baldwin Park': [447.8, 159.3],
+  'Buena Park': [440.7, 220.0], 'Burbank': [364.0, 132.6], 'Glendale': [376.3, 149.6],
+  'Industry': [474.5, 182.0], 'Irvine': [502.0, 280.4], 'L.A. Union Station': [383.2, 173.7],
+  'Montebello': [407.4, 182.7], 'Ontario': [537.3, 172.7], 'Orange': [467.6, 241.4],
+  'Pomona': [496.6, 167.1], 'Santa Ana': [471.8, 254.8], 'Sun Valley': [350.4, 120.9],
+  'Sylmar': [332.4, 100.9], 'Tustin': [483.6, 267.1],
+};
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+// Centers the station in the map window, kept inside the map's edges, and moves the pin with the map
+function mapZoom(station) {
+  const xy = STATION_XY[station];
+  if (!xy) return null;
+  const s = MAP.scale;
+  const tx = clamp(MAP.center[0] - MAP.left - s * xy[0], MAP.viewport[0] - MAP.left - s * MAP.width, -MAP.left);
+  const ty = clamp(MAP.center[1] - s * xy[1], MAP.viewport[1] - s * MAP.height, 0);
+  const px = MAP.left + tx + s * PIN.at[0] - PIN.anchor[0];
+  const py = ty + s * PIN.at[1] - PIN.anchor[1];
+  return {
+    img: { transform: `translate(${tx}px, ${ty}px) scale(${s})` },
+    pin: { transform: `translate(${px}px, ${py}px) scale(${PIN.scale * s})` },
+  };
+}
 
 export function Home() {
   const { go, trip, update } = useApp();
-  const target = mapViewFor(trip);
-  const [view, setView] = useState(target);
-  useEffect(() => setView(target), [target]);
+  const [focus, setFocus] = useState(trip.to || trip.from || null);
+  const last = useRef(trip);
+  useEffect(() => {
+    const prev = last.current;
+    last.current = trip;
+    if (trip.to !== prev.to && trip.to) setFocus(trip.to);
+    else if (trip.from !== prev.from && trip.from) setFocus(trip.from);
+    else if (!trip.from && !trip.to) setFocus(null);
+  }, [trip.from, trip.to]);
+  const zoom = mapZoom(focus);
   const toggleTrain = () => {
-    setView(v => (v ? null : 'anaheim'));
-    if (!view && !trip.from) update({ from: 'Anaheim' }); // Figma 7068 pre-selects the train's next stop
+    setFocus(f => (f ? null : trip.from || 'Anaheim'));
+    if (!focus && !trip.from) update({ from: 'Anaheim' }); // Figma 7068 pre-selects the train's next stop
   };
   return html`
     <div class="screen" style=${{ height: 1253 }}>
-      <div class=${cx('home-map', view && 'is-zoomed', view === 'la' && 'is-la')}>
-        <img class="home-map__img" src=${asset('home/map.png')} alt="Metrolink system map" />
-        <button class="home-map__pin" onClick=${toggleTrain} aria-label="Train A584">
+      <div class=${cx('home-map', zoom && 'is-zoomed')}>
+        <img class="home-map__img" src=${asset('home/map.png')} alt="Metrolink system map" style=${zoom?.img} />
+        <button class="home-map__pin" onClick=${toggleTrain} aria-label="Train A584" style=${zoom?.pin}>
           <img src=${asset('home/pin-a584-large.svg')} alt="" />
           <span>A584</span>
         </button>
