@@ -394,16 +394,20 @@ const tween = (ms, fn, e = ease.io, delay = 0) => new Promise(res => {
 
 // Each guide line is two halves running out from a point inside the mark.
 // Visible part of a half = [tail, head] px from that point, drawn with a dash pattern.
-const FAR = 1700, U = [.682, -.731]; // logo diagonal ~47°
+// Guides are placed in the mark's own units (viewBox 1634 x 577), mapped onto #mark at left 380, top 822, width 440.
+const FAR = 1700, lp = (x, y) => [380 + x * 440 / 1634, 822 + y * 440 / 1634];
+const U = [452.3 / 650.97, -468.2 / 650.97]; // slope of the third stroke's outer edge
+const [, yBar] = lp(0, 187.2), [, yFoot] = lp(0, 337.6);  // underside of the top bars / foot of strokes 1-2
+const A = lp(497.1, 337.6), B = lp(757.9, 576.6);         // stroke 2 foot corner / stroke 3 outer edge
 const HALVES = [];
-[[600, 875, 1, 0, 'h'], [600, 912, 1, 0, 'h'], [540, 900, U[0], U[1], 'd'], [650, 900, U[0], U[1], 'd']].forEach(([cx, cy, ux, uy, kind]) =>
+[[600, yBar, 1, 0, 'h'], [600, yFoot, 1, 0, 'h'], [...A, U[0], U[1], 'd'], [...B, U[0], U[1], 'd']].forEach(([cx, cy, ux, uy, kind]) =>
   [1, -1].forEach(sg => {
     const el = svg('line', { x1: cx, y1: cy, x2: cx + sg * ux * FAR, y2: cy + sg * uy * FAR });
     $('#lines').append(el);
     HALVES.push({ el, kind, tail: 0, head: 0 });
   }));
 const drawHalf = h => h.el.setAttribute('stroke-dasharray', `0 ${h.tail} ${Math.max(0, h.head - h.tail)} 9999`);
-const pose = { attract: { h: 600, d: 500 }, near: { h: 404, d: 500 } };
+const pose = { attract: { h: FAR, d: FAR }, near: { h: 404, d: FAR } }; // FAR runs past every edge; #stage clips
 function setPose(name, ms = 700) {
   return Promise.all(HALVES.map(h => { const t0 = h.tail, h0 = h.head, h1 = pose[name][h.kind]; return tween(ms, k => { h.tail = t0 * (1 - k); h.head = h0 + (h1 - h0) * k; drawHalf(h); }); }));
 }
