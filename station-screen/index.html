@@ -51,7 +51,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 
 .here h1 { font-weight: 400; font-size: 54px; line-height: 1; margin: 8px 0 12px; letter-spacing: -.02em; }
 .tags { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
-.tag i { display: inline-block; width: 16px; height: 3px; margin-right: 8px; vertical-align: middle; }
+.tag svg { width: 26px; height: 12px; margin-right: 8px; vertical-align: -1px; }
 .tag em { font-style: normal; opacity: .6; margin-left: 4px; }
 .pick { position: absolute; left: 0; right: 0; top: 136px; bottom: 0; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
 .pick.show { opacity: 1; transform: none; }
@@ -233,7 +233,14 @@ const me = make('div', 'train me'); trains.append(me);
 let step = 'attract', trip = null, idle = 0;
 const fmtClock = (d) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 const mmss = s => { s = Math.max(0, Math.ceil(s)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
-const tag = L => { const t = make('span', 'tag'); const i = make('i'); i.style.background = L.color; t.append(i, L.name, make('em', '', `[${L.id}]`)); return t; };
+// Line ribbon from the mobile prototype's Explore page (assets/explore/line-*.svg), filled per line.
+const RIBBON = 'M57.4978 0V14.904H41.0413C37.5206 14.904 34.1644 16.2414 31.8373 18.5712L31.6839 18.7202L23.0756 26.8821H0L19.2482 8.63451C24.7781 3.14552 32.713 0 41.0413 0H57.4978Z';
+const tag = L => {
+  const t = make('span', 'tag'), icon = svg('svg', { viewBox: '0 0 57.4978 26.8821', 'aria-hidden': 'true' });
+  icon.append(svg('path', { d: RIBBON, fill: L.color }));
+  t.append(icon, L.name, make('em', '', `[${L.id}]`));
+  return t;
+};
 
 $('#oName').textContent = ORIGIN;
 $('#oTags').append(...LINES.filter(L => serves(L, ORIGIN)).map(tag));
