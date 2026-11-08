@@ -269,7 +269,7 @@ function toStation() {
   trains.classList.remove('quiet'); me.classList.remove('show'); trip = null;
   const k0 = R.findIndex(r => touches(r, ORIGIN));
   paint(r => (r.i < 0 ? serves(r.L, ORIGIN) : touches(r, ORIGIN)) ? 'on' : serves(r.L, ORIGIN) ? 'mid' : '', new Set([ORIGIN]), (r, k) => Math.abs(k - k0) * 7);
-  setTimeout(() => { if (step === 'station') { step = 'select'; showStation(); } }, 1700);
+  setTimeout(() => { if (step === 'station') { step = 'select'; showStation(); } }, 1100);
 }
 
 // ---------------- Trip timeline ----------------
@@ -444,25 +444,25 @@ async function welcome() {
   // 1. gradient fades and the mark turns white, on a clean screen
   clearLines();
   intro.classList.add('awake'); intro.classList.remove('near');
-  await wait(1100);
+  await wait(700);
   // 2. lines spread out past the edges  3. their tails follow them off-screen, leaving the mark
   await sweep();
-  await wait(500);
+  await wait(250);
   // 4. personal welcome
   $('#mark').classList.add('out');
-  await wait(300);
+  await wait(200);
   $('#welcome').classList.add('show');
-  await wait(2200);
+  await wait(1500);
   // 5. hand over to the poster
   $('#welcome').classList.remove('show');
-  await wait(500);
+  await wait(350);
   intro.classList.add('gone');
   R.forEach((r, k) => r.el.style.setProperty('--d', k * 9 + 'ms'));
   field.classList.remove('hidden', 'focus');
   ST.forEach(s => s.classList.remove('hl'));
-  await wait(400);
+  await wait(250);
   $('#console').classList.remove('hidden');
-  await wait(1000);
+  await wait(600);
   idle = 0; toStation();
 }
 
