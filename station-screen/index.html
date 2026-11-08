@@ -422,18 +422,6 @@ function sweep() {
     ]);
   }));
 }
-// Attract loop: empty mark, burst, pause, repeat.
-let loop = 0;
-async function attractLoop() {
-  const mine = ++loop;
-  if (RM) return; // no looping motion for reduced-motion viewers
-  while (mine === loop && step === 'attract') {
-    await wait(1600);
-    if (mine !== loop || step !== 'attract') return;
-    await sweep();
-  }
-}
-
 let nearTimer;
 $('#intro').addEventListener('pointermove', () => {
   if (step !== 'attract') return;
@@ -447,7 +435,7 @@ async function welcome() {
   step = 'intro'; clearTimeout(nearTimer);
   const intro = $('#intro');
   // 1. gradient fades and the mark turns white, on a clean screen
-  loop++; clearLines();
+  clearLines();
   intro.classList.add('awake'); intro.classList.remove('near');
   await wait(1100);
   // 2. lines spread out past the edges  3. their tails follow them off-screen, leaving the mark
@@ -479,8 +467,7 @@ function toAttract() {
   const intro = $('#intro');
   intro.classList.remove('gone', 'awake', 'near');
   $('#mark').classList.remove('out'); $('#welcome').classList.remove('show');
-  clearLines();
-  attractLoop();
+  clearLines(); // waiting screen is the still mark; lines only play after the phone tap
 }
 
 $('#intro').addEventListener('click', welcome);
