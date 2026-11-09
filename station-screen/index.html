@@ -156,6 +156,7 @@ const SPEED = Math.min(120, Math.max(1, +Q.get('speed') || 1)); // ?speed=20 for
 const SEG = 420;      // shortcut: flat 7 min between stops; swap in Metrolink GTFS schedule + GTFS-RT positions for real service
 const DWELL = 60, TRANSFER = 360;
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (Q.has('embed')) document.documentElement.style.background = document.body.style.background = 'transparent'; // ?embed: no dark letterbox around the screen
 
 const $ = s => document.querySelector(s);
 const make = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
