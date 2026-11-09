@@ -75,16 +75,15 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 .actions button { border: 1px solid rgba(255,255,255,.7); border-radius: 6px; padding: 9px 18px; font-size: 14px; }
 .actions button:hover, .actions button:focus-visible { background: #fff; color: var(--blue); outline: none; }
 
-/* ---------- Welcome / attract layer ---------- */
-#intro { position: absolute; inset: 0; background: var(--blue); transition: opacity .9s ease; }
-#intro.gone { opacity: 0; pointer-events: none; }
-#grad { position: absolute; inset: 0; transition: opacity 1.2s ease;
-  background: linear-gradient(180deg, #000814 0%, #001a4d 26%, rgba(0,73,186,0) 50%, #001a4d 74%, #000814 100%); }
-#intro.near #grad { opacity: .72; }
-#mark { position: absolute; left: 320px; top: 882px; width: 440px; fill: #c4c9d1; transition: fill 1.2s ease; }
-#hint { position: absolute; left: 0; right: 0; bottom: 120px; text-align: center; font-size: 20px; opacity: .75; transition: opacity .6s; }
-#hint i { display: block; width: 12px; height: 12px; margin: 0 auto 18px; border-radius: 50%; background: #fff; animation: ping 2.4s ease-out infinite; }
-@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.6); } 100% { box-shadow: 0 0 0 28px rgba(255,255,255,0); } }
+/* ---------- Opening ---------- */
+/* An opacity wave rolls down the map, row by row: each word swells in, eases back, and settles at full. --wv = its place in the wave. */
+#field.hidden .row span { opacity: 0; }
+#field.intro .row span { animation: wave var(--wave) ease-in-out var(--wv, 0ms) both; }
+@keyframes wave { 0% { opacity: 0; } 40% { opacity: 1; } 70% { opacity: .4; } 100% { opacity: 1; } }
+/* Console parts rise in one after another. */
+.corner, .here > * { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+#console.hidden .corner, #console.hidden .here > * { opacity: 0; transform: translateY(16px); }
+.here > :nth-child(1) { transition-delay: .15s; } .here > :nth-child(2) { transition-delay: .25s; } .here > :nth-child(3) { transition-delay: .38s; } .corner { transition-delay: .3s; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; } }
 </style>
@@ -113,15 +112,6 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
     </div>
   </div>
 
-  <div id="intro">
-    <div id="grad"></div>
-    <svg id="mark" viewBox="0 0 1634 577" aria-label="Metrolink">
-      <path d="M637.1,0L637.1,187.2L454.7,187.2C415.7,187.2 378.5,204 352.8,233.2L351.1,235.1L255.7,337.6L0,337.6L213.3,108.4C274.5,39.5 362.5,0 454.7,0Z"/>
-      <path d="M1134.1,0L1134.1,187.2L951.8,187.2C912.8,187.2 875.6,204 849.8,233.2L848.1,235.1L752.7,337.6L497.1,337.6L710.3,108.4C771.6,39.5 859.5,0 951.8,0Z"/>
-      <path d="M1634,0L1634,187.2L1451.7,187.2C1412.7,187.2 1375.5,204 1349.7,233.2L1348,235.1L1013.5,576.6L757.9,576.6L1210.2,108.4C1271.5,39.5 1359.4,0 1451.7,0Z"/>
-    </svg>
-    <div id="hint"><i></i>Hold your phone near the screen</div>
-  </div>
 </div>
 
 <script>
@@ -219,7 +209,7 @@ const ambient = LINES.flatMap(L => [0, 1].map(k => {
 const me = make('div', 'train me'); trains.append(me);
 
 // ---------------- Steps ----------------
-let step = 'attract', trip = null, idle = 0;
+let step = 'open', trip = null, idle = 0;
 const fmtClock = (d) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 const mmss = s => { s = Math.max(0, Math.ceil(s)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
 // Line ribbon from the mobile prototype's Explore page (assets/explore/line-*.svg), filled per line.
@@ -363,15 +353,13 @@ function tickTrip() {
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(.1, (now - last) / 1000) * SPEED; last = now;
-  if (step !== 'attract') {
-    ambient.forEach(a => {
-      a.p += a.dir * dt / SEG;
-      const end = a.L.stops.length - 1;
-      if (a.p <= 0 || a.p >= end) { a.dir *= -1; a.p = Math.min(end, Math.max(0, a.p)); }
-      placeTrain(a.el, a.L, a.p);
-    });
-    if (trip) tickTrip();
-  }
+  ambient.forEach(a => {
+    a.p += a.dir * dt / SEG;
+    const end = a.L.stops.length - 1;
+    if (a.p <= 0 || a.p >= end) { a.dir *= -1; a.p = Math.min(end, Math.max(0, a.p)); }
+    placeTrain(a.el, a.L, a.p);
+  });
+  if (trip) tickTrip();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -379,49 +367,33 @@ requestAnimationFrame(frame);
 function clock() { const d = new Date(); $('#clock').textContent = fmtClock(d); $('#date').textContent = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase(); }
 setInterval(clock, 1000); clock();
 
-// ---------------- Welcome screen ----------------
-let nearTimer;
-$('#intro').addEventListener('pointermove', () => {
-  if (step !== 'attract') return;
-  $('#intro').classList.add('near');
-  clearTimeout(nearTimer);
-  nearTimer = setTimeout(() => step === 'attract' && $('#intro').classList.remove('near'), 2500);
-});
-
-// Tap -> straight into the station view (no opening sequence).
-function welcome() {
-  if (step !== 'attract') return;
-  clearTimeout(nearTimer);
-  $('#intro').classList.add('gone');
-  field.classList.remove('hidden');
-  $('#console').classList.remove('hidden');
-  idle = 0; toStation();
+// ---------------- Opening ----------------
+// Screen is live on load: an opacity wave rolls down the map, the console rises, then the view settles on "You are here".
+const WAVE = 1500, SPREAD = 1300; // ms each word takes / ms for the wave to travel from the top of the map to the bottom
+function open() {
+  step = 'open';
+  field.style.setProperty('--wave', WAVE + 'ms');
+  R.forEach(r => [...r.el.children].forEach(s =>
+    s.style.setProperty('--wv', Math.round(r.el.offsetTop / 1410 * SPREAD) + 'ms')));
+  field.classList.add('intro'); field.classList.remove('hidden');
+  setTimeout(() => { $('#console').classList.remove('hidden'); $('#pStation').classList.add('show'); }, SPREAD * .8);
+  setTimeout(() => field.classList.remove('intro'), SPREAD + WAVE);
+  setTimeout(() => { idle = 0; toStation(); }, SPREAD + WAVE + 80); // a beat after the wave lets go, so the dimming fades instead of snapping
 }
 
-function toAttract() {
-  step = 'attract'; trip = null;
-  field.className = 'hidden'; $('#console').classList.add('hidden');
-  me.classList.remove('show');
-  $('#pStation').classList.remove('show'); $('#pRoute').classList.remove('show');
-  const intro = $('#intro');
-  intro.classList.remove('gone', 'near');
-}
-
-$('#intro').addEventListener('click', welcome);
-field.addEventListener('click', e => { const st = e.target.dataset && e.target.dataset.st; if (st && st !== ORIGIN && step !== 'attract') go(st); });
+field.addEventListener('click', e => { const st = e.target.dataset && e.target.dataset.st; if (st && st !== ORIGIN && step !== 'open') go(st); });
 field.addEventListener('pointerover', e => { const st = e.target.dataset && e.target.dataset.st; if (st && st !== ORIGIN) preview(st); });
 field.addEventListener('pointerleave', () => step === 'select' && showStation(false));
 $('#bBack').addEventListener('click', () => { trip = null; toStation(); });
-$('#bDone').addEventListener('click', toAttract);
+$('#bDone').addEventListener('click', () => { trip = null; toStation(); });
 addEventListener('keydown', e => {
   idle = 0;
-  if (e.key === 'Escape') toAttract();
-  else if ((e.key === ' ' || e.key === 'Enter') && step === 'attract') { e.preventDefault(); welcome(); }
+  if (e.key === 'Escape' && step === 'route') { trip = null; toStation(); }
 });
 addEventListener('pointerdown', () => idle = 0);
-setInterval(() => { if (step !== 'attract' && ++idle >= 90) toAttract(); }, 1000); // 90 s without touch -> back to attract
+setInterval(() => { if (step === 'route' && ++idle >= 90) { trip = null; toStation(); } }, 1000); // 90 s without touch -> back to the station view
 
-toAttract();
+document.fonts.ready.then(open); // start once Anta is in, so rows are laid out in their final font
 </script>
 </body>
 </html>
