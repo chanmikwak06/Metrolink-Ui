@@ -113,6 +113,7 @@
 
   // ---------------- Steps ----------------
   let step = 'open', trip = null, idle = 0, pickMode = 'dest', alertIx = 0, editing = false, selId = null;
+  const lineRows = new Map(); // line -> the element listing its next trains
   // Line ribbon from the mobile prototype's Explore page (assets/explore/line-*.svg), filled per line.
   const RIBBON = 'M57.4978 0V14.904H41.0413C37.5206 14.904 34.1644 16.2414 31.8373 18.5712L31.6839 18.7202L23.0756 26.8821H0L19.2482 8.63451C24.7781 3.14552 32.713 0 41.0413 0H57.4978Z';
   const ribbon = L => { const i = svg('svg', { viewBox: '0 0 57.4978 26.8821', 'aria-hidden': 'true' }); i.append(svg('path', { d: RIBBON, fill: L.color })); return i; };
@@ -122,7 +123,11 @@
 
   function stationText() {
     $('#oName').textContent = dn(station); document.fonts.ready.then(() => fitText($('#oName'), 54)); // measure in Anta, not the fallback font
-    $('#oTags').replaceChildren(...S.routes.filter(L => serves(L, station)).map(tag));
+    lineRows.clear();
+    $('#pStation').classList.toggle('many', S.routes.filter(L => serves(L, station)).length > 4);
+    $('#oLines').replaceChildren(...S.routes.filter(L => serves(L, station)).map(L => {
+      const row = make('div', 'ln'), trs = make('div', 'trs'); row.append(tag(L), trs); lineRows.set(L, trs); return row;
+    }));
     buildList();
   }
   function buildList() {
@@ -217,7 +222,7 @@
   }
 
   // Journey line: dashed = your train on its way to you, solid = your ride; a tick for every stop.
-  const W = 1008, PAD = 80, Y = 62;
+  const W = 1008, PAD = 8, Y = 62; // the line runs edge to edge of the console text column
   let dx = () => 0, back = 0, D = 1;
   function drawDiagram() {
     const g = $('#diagram'); g.replaceChildren();
@@ -235,8 +240,8 @@
     P.forEach((q, i) => { acc += q.l.to - q.l.from;
       keys.push(i === P.length - 1 ? { d: acc, name: dn(trip.dest), sub: 'Destination', t: q.pa.arr, kind: 'dest' } : { d: acc, name: dn(q.l.trip.stops[q.l.to]), sub: 'Change trains', t: P[i + 1].pd.dep, kind: 'xfer' }); });
     keys.forEach(k => {
-      const x = dx(k.d), anchor = x < 140 ? 'start' : x > W - 140 ? 'end' : 'middle';
-      g.append(svg('circle', { cx: x, cy: Y, r: k.kind === 'origin' ? 7 : 6, fill: k.kind === 'origin' ? '#fff' : 'var(--blue)', stroke: '#fff', 'stroke-width': 2.5 }));
+      const cx = dx(k.d), anchor = cx < 140 ? 'start' : cx > W - 140 ? 'end' : 'middle', x = anchor === 'start' ? 0 : anchor === 'end' ? W : cx; // edge labels flush with the margins
+      g.append(svg('circle', { cx, cy: Y, r: k.kind === 'origin' ? 7 : 6, fill: k.kind === 'origin' ? '#fff' : 'var(--blue)', stroke: '#fff', 'stroke-width': 2.5 }));
       const sub = svg('text', { x, y: 14, 'text-anchor': anchor, 'font-size': 10, 'letter-spacing': '.18em', opacity: .7 }); sub.textContent = k.sub.toUpperCase();
       const nm = svg('text', { x, y: 36, 'text-anchor': anchor, 'font-size': 16 }); nm.textContent = k.name;
       const tm = svg('text', { x, y: 96, 'text-anchor': anchor, 'font-size': 14, opacity: .8 }); tm.textContent = fmtClock(k.t);
@@ -289,20 +294,24 @@
     }
     for (const [k, t] of pool) if (!keep.has(k)) { t.el.remove(); pool.delete(k); }
 
-    // Next trains at this station, in the tag line's voice.
-    const box = $('#oNext');
-    if (list.length) box.replaceChildren(...list.slice(0, 3).map(x => {
-      const e = make('span', 'nt'), late = lateMin(x.p);
-      e.append(ribbon(routeOfTrip(x.c.trip)), make('span', x.p.canceled ? 'x' : '', `${x.c.trip.no} → ${compact(x.c.trip.headsign)}`), make('em', '', when(x, now)));
-      if (late >= 1) e.append(make('span', 'late', `+${late}`));
-      return e;
-    }));
-    else { const nx = S.calls(station, now, now + 30 * 3600e3).find(c => !c.terminates); box.replaceChildren(make('span', 'nt', 'No trains in the next 3 hours'), make('em', '', nx ? `Next: Train ${nx.trip.no}, ${fmtClock(nx.dep)}` : '')); }
+    // Each line this station serves, with its next trains beside it.
+    for (const [L, box] of lineRows) {
+      const mine = list.filter(x => routeOfTrip(x.c.trip) === L).slice(0, 2); // two trains = two grid cells
+      if (mine.length) box.replaceChildren(...mine.map(x => {
+        const e = make('span', 'nt'), late = lateMin(x.p);
+        e.append(make('span', x.p.canceled ? 'x' : '', `${x.c.trip.no} → ${compact(x.c.trip.headsign)}`), make('em', '', when(x, now)));
+        if (late >= 1) e.append(make('span', 'late', `+${late}`));
+        return e;
+      }));
+      else { const nx = S.calls(station, now, now + 30 * 3600e3).find(c => !c.terminates && routeOfTrip(c.trip) === L);
+        box.replaceChildren(make('em', 'none', nx ? `No trains in the next 3 hours · next ${nx.trip.no} → ${compact(nx.trip.headsign)}, ${fmtClock(nx.dep)}` : 'No scheduled trains')); }
+    }
 
     renderAlert(now, new Set(list.map(x => x.c.trip.id)));
     $('#clock').textContent = fmtClock(now);
     $('#date').textContent = new Date(now).toLocaleDateString('en-US', { timeZone: S.TZ, weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
     const st = rt.status;
+    if (DEMO) $('#demoTag').textContent = `Demo · ${rt.demo.scenario}${rt.demo.clock.paused ? ' · paused' : rt.demo.clock.speed > 1 ? ` · ${rt.demo.clock.speed}×` : ''}`;
     $('#src').textContent = rt.kind === 'demo' ? `${rt.demo.scenario}${rt.demo.clock.paused ? ' · paused' : rt.demo.clock.speed > 1 ? ` · ${rt.demo.clock.speed}×` : ''}`
       : rt.kind === 'schedule' ? 'Scheduled times' : st.trips.state === 'ok' ? 'Live' : 'Live data down · scheduled times';
     if (trip) tickTrip();

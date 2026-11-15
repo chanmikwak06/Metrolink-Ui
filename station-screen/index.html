@@ -17,7 +17,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: var(--blue); overflow: hidden; font-family: 'Anta', sans-serif; color: #fff; letter-spacing: -.006em; user-select: none; -webkit-user-select: none; }
 
 /* ---------- Poster field ---------- */
-#field { position: absolute; left: 22px; right: 22px; top: 20px; height: 1410px; }
+#field { position: absolute; left: 36px; right: 36px; top: 20px; height: 1410px; } /* same 36 px margin as the console, so poster and text share edges */
 .sec { margin-top: var(--rh); }
 .sec:first-child { margin-top: 0; }
 .row { display: flex; justify-content: space-between; height: var(--rh); line-height: var(--rh); font-size: 11px; white-space: nowrap; }
@@ -49,15 +49,23 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #console.hidden { opacity: 0; transform: translateY(40px); }
 label button { font-size: inherit; letter-spacing: inherit; text-transform: inherit; margin-left: 14px; text-decoration: underline; text-underline-offset: 3px; opacity: .8; }
 #src { font-size: 10px; letter-spacing: .14em; opacity: .55; margin-top: 6px; text-transform: uppercase; }
-/* Next trains at this station: same type and rhythm as the line tags. */
-.next { display: flex; gap: 30px; font-size: 14px; margin-top: 12px; white-space: nowrap; overflow: hidden; }
-.next .nt { display: inline-flex; align-items: center; gap: 7px; min-width: 0; }
-.next svg { width: 26px; height: 12px; flex: none; }
-.next em { font-style: normal; opacity: .6; }
-.next .late { background: #fff; color: var(--blue); padding: 0 5px; border-radius: 3px; font-size: 12px; }
-.next .x { opacity: .45; text-decoration: line-through; }
+/* Lines down the left, each with its next trains beside it. */
+.lines { margin-top: 2px; }
+/* Everything in the console sits on the Where-to list's grid: 6 columns, 18 px gaps. A line takes 2 columns, each train 2. */
+.ln { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: 18px; align-items: center; height: 22px; font-size: 14px; white-space: nowrap; }
+.ln > .tag, .ln .nt { grid-column: span 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ln .trs { display: contents; }
+.ln .nt { display: flex; align-items: center; gap: 7px; }
+.ln .none { grid-column: span 4; overflow: hidden; text-overflow: ellipsis; }
+.ln em { font-style: normal; opacity: .6; }
+.ln .late { background: #fff; color: var(--blue); padding: 0 5px; border-radius: 3px; font-size: 12px; }
+.ln .x { opacity: .45; text-decoration: line-through; }
+/* The station pane stacks: here, then the list right below however many lines there are. */
+#pStation { display: flex; flex-direction: column; }
+/* L.A. Union Station (6 lines): tighter rows and a 7th list column so everything still fits */
+.many .ln { height: 18px; grid-template-columns: repeat(7, minmax(0, 1fr)); } .many .pick { margin-top: 8px; } .many #destList { columns: 7; }
 /* Service alert: one white line on the console edge, only when there is one. */
-#alert { position: absolute; left: 22px; right: 22px; top: 1414px; height: 26px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #fff; color: var(--blue); border-radius: 3px;
+#alert { position: absolute; left: 36px; right: 36px; top: 1414px; height: 26px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #fff; color: var(--blue); border-radius: 3px;
   font-size: 12px; white-space: nowrap; overflow: hidden; transition: opacity .6s; }
 #alert.off { opacity: 0; pointer-events: none; }
 #alert b { font-weight: 400; letter-spacing: .16em; text-transform: uppercase; font-size: 10px; flex: none; }
@@ -73,7 +81,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 .tags { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
 .tag svg { width: 26px; height: 12px; margin-right: 8px; vertical-align: -1px; }
 .tag em { font-style: normal; opacity: .6; margin-left: 4px; }
-.pick { position: absolute; left: 0; right: 0; top: 164px; bottom: 0; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
+.pick { position: relative; margin-top: 14px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
 .pick.show { opacity: 1; transform: none; }
 .pick:not(.show) { pointer-events: none; }
 .pick label span { text-transform: none; letter-spacing: 0; margin-left: 14px; opacity: .8; }
@@ -87,7 +95,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 #diagram { position: absolute; left: 0; top: 104px; width: 1008px; height: 120px; overflow: visible; }
 #diagram text { fill: #fff; font-family: 'Anta', sans-serif; }
 #dTrain { filter: drop-shadow(0 0 6px #fff); }
-.stats { position: absolute; left: 0; right: 0; top: 244px; display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 28px; }
+.stats { position: absolute; left: 0; right: 0; top: 244px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 18px; }
 .stats big { display: block; font-size: 60px; line-height: 1; margin-top: 8px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .stats b { display: block; font-weight: 400; font-size: 34px; line-height: 1; margin-top: 8px; }
 .stats p { margin: 8px 0 0; font-size: 13px; opacity: .78; }
@@ -108,8 +116,8 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 .here > :nth-child(1) { transition-delay: .15s; } .here > :nth-child(2) { transition-delay: .25s; } .here > :nth-child(3) { transition-delay: .38s; } .corner { transition-delay: .3s; }
 
 /* ----- Demo Mode (only with ?demo): simulated data, always labelled ----- */
-#demoTag { display: none; margin-top: 8px; background: #fff; color: var(--blue); font-size: 10px; letter-spacing: .14em; padding: 3px 6px; border-radius: 3px; text-transform: uppercase; }
-.demo #demoTag { display: inline-block; cursor: pointer; }
+#demoTag { display: none; margin-top: 6px; background: #fff; color: var(--blue); font-size: 10px; letter-spacing: .14em; padding: 3px 6px; border-radius: 3px; text-transform: uppercase; }
+.demo #demoTag { display: inline-block; cursor: pointer; } .demo #src { display: none; }
 #edit { position: absolute; left: 0; right: 0; top: 1090px; height: 360px; background: var(--blue); border-top: 1px solid rgba(255,255,255,.35); padding: 18px 36px; box-sizing: border-box; z-index: 3;
   transition: opacity .4s, transform .4s; }
 #edit.off { opacity: 0; transform: translateY(16px); pointer-events: none; }
@@ -134,7 +142,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
     <div class="corner"><div><div id="clock"></div><div id="date"></div><div id="src"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div></div></div>
 
     <div class="pane" id="pStation">
-      <div class="here"><label>You are here<button id="bStation">Change station</button></label><h1 id="oName"></h1><div class="tags" id="oTags"></div><div class="next" id="oNext" aria-live="polite"></div></div>
+      <div class="here"><label>You are here<button id="bStation">Change station</button></label><h1 id="oName"></h1><div class="lines" id="oLines" aria-live="polite"></div></div>
       <div class="pick" id="pick"><label id="pickLbl"></label><div id="destList"></div></div>
     </div>
 
