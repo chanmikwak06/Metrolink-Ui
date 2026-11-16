@@ -1,4 +1,4 @@
-// Screen layer: the original station-screen design (poster, wave, console, trip timeline) driven by real data.
+// Screen layer: the original station-screen design (console on top, poster below, wave, trip timeline) driven by real data.
 // Sched = official timetable, RT = live feeds or the separate Demo source. No data rules live here.
 (function () {
   const S = Sched, MIN = 60000;

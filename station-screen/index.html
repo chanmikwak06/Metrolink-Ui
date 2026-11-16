@@ -17,7 +17,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: var(--blue); overflow: hidden; font-family: 'Anta', sans-serif; color: #fff; letter-spacing: -.006em; user-select: none; -webkit-user-select: none; }
 
 /* ---------- Poster field ---------- */
-#field { position: absolute; left: 36px; right: 36px; top: 20px; height: 1410px; } /* same 36 px margin as the console, so poster and text share edges */
+#field { position: absolute; left: 36px; right: 36px; top: 478px; height: 1410px; } /* same 36 px margin as the console, so poster and text share edges */
 .sec { margin-top: var(--rh); }
 .sec:first-child { margin-top: 0; }
 .row { display: flex; justify-content: space-between; height: var(--rh); line-height: var(--rh); font-size: 11px; white-space: nowrap; }
@@ -43,14 +43,14 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .train.me.show { opacity: 1; animation: blink 1.6s ease-in-out infinite; }
 @keyframes blink { 50% { box-shadow: 0 0 3px 0 rgba(255,255,255,.4); } }
 
-/* ---------- Console (bottom quarter) ---------- */
-#console { position: absolute; left: 0; right: 0; top: 1450px; bottom: 0; padding: 26px 36px; border-top: 1px solid rgba(255,255,255,.35);
+/* ---------- Console (top quarter): open space below it separates it from the map ---------- */
+#console { position: absolute; left: 0; right: 0; top: 0; height: 470px; box-sizing: border-box; padding: 26px 36px;
   transition: opacity .8s ease, transform .8s ease; }
-#console.hidden { opacity: 0; transform: translateY(40px); }
+#console.hidden { opacity: 0; transform: translateY(-24px); }
 label button { font-size: inherit; letter-spacing: inherit; text-transform: inherit; margin-left: 14px; text-decoration: underline; text-underline-offset: 3px; opacity: .8; }
 #src { font-size: 10px; letter-spacing: .14em; opacity: .55; margin-top: 6px; text-transform: uppercase; }
 /* Lines down the left, each with its next trains beside it. */
-.lines { margin-top: 2px; }
+.lines { margin-top: 18px; }
 /* Everything in the console sits on the Where-to list's grid: 6 columns, 18 px gaps. A line takes 2 columns, each train 2. */
 .ln { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: 18px; align-items: center; height: 22px; font-size: 14px; white-space: nowrap; }
 .ln > .tag, .ln .nt { grid-column: span 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -64,28 +64,31 @@ label button { font-size: inherit; letter-spacing: inherit; text-transform: inhe
 #pStation { display: flex; flex-direction: column; }
 /* L.A. Union Station (6 lines): tighter rows and a 7th list column so everything still fits */
 .many .ln { height: 18px; grid-template-columns: repeat(7, minmax(0, 1fr)); } .many .pick { margin-top: 8px; } .many #destList { columns: 7; }
-/* Service alert: one white line on the console edge, only when there is one. */
-#alert { position: absolute; left: 36px; right: 36px; top: 1414px; height: 26px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #fff; color: var(--blue); border-radius: 3px;
+/* Service alert: one white line in the gap between console and map, only when there is one. */
+#alert { position: absolute; left: 36px; right: 36px; top: 436px; height: 26px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #fff; color: var(--blue); border-radius: 3px;
   font-size: 12px; white-space: nowrap; overflow: hidden; transition: opacity .6s; }
 #alert.off { opacity: 0; pointer-events: none; }
 #alert b { font-weight: 400; letter-spacing: .16em; text-transform: uppercase; font-size: 10px; flex: none; }
 #alert span { overflow: hidden; text-overflow: ellipsis; }
 label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; opacity: .7; }
-.corner { position: absolute; right: 36px; top: 26px; display: flex; align-items: flex-start; gap: 28px; text-align: right; }
-#clock { font-size: 34px; line-height: 1; }
-#date { font-size: 12px; opacity: .7; margin-top: 6px; letter-spacing: .08em; }
-.pane { position: absolute; inset: 26px 36px; opacity: 0; transform: translateY(14px); pointer-events: none; transition: opacity .6s ease, transform .6s ease; }
+.corner { position: absolute; right: 36px; top: 40px; display: flex; align-items: flex-start; gap: 28px; text-align: right; }
+/* date + data source sit above the clock; the clock lines up with the station name */
+#clock { font-size: 34px; line-height: 1; margin-top: 10px; }
+#date { font-size: 12px; opacity: .7; letter-spacing: .08em; }
+.pane { position: absolute; inset: 40px 36px 16px; opacity: 0; transform: translateY(14px); pointer-events: none; transition: opacity .6s ease, transform .6s ease; }
 .pane.show { opacity: 1; transform: none; pointer-events: auto; }
 
-.here h1 { font-weight: 400; font-size: 54px; line-height: 1; margin: 8px 0 12px; letter-spacing: -.02em; }
+.here h1 { font-weight: 400; font-size: 54px; line-height: 1; margin: 10px 0 0; letter-spacing: -.02em; }
 .tags { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
 .tag svg { width: 26px; height: 12px; margin-right: 8px; vertical-align: -1px; }
 .tag em { font-style: normal; opacity: .6; margin-left: 4px; }
-.pick { position: relative; margin-top: 14px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
+.pick { position: relative; margin-top: 24px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
 .pick.show { opacity: 1; transform: none; }
 .pick:not(.show) { pointer-events: none; }
-.pick label span { text-transform: none; letter-spacing: 0; margin-left: 14px; opacity: .8; }
-#destList { margin-top: 10px; columns: 6; column-gap: 18px; }
+/* hint starts on the list's 2nd column (1 column + 1 gap) */
+.pick label span { position: absolute; left: calc((100% - 90px) / 6 + 18px); text-transform: none; letter-spacing: 0; opacity: .8; }
+.many .pick label span { left: calc((100% - 108px) / 7 + 18px); }
+#destList { margin-top: 14px; columns: 6; column-gap: 18px; }
 #destList button { display: block; width: 100%; text-align: left; font-size: 13px; line-height: 18px; opacity: .82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #destList button:hover, #destList button:focus-visible { opacity: 1; outline: none; text-decoration: underline; text-underline-offset: 3px; }
 
@@ -118,7 +121,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 /* ----- Demo Mode (only with ?demo): simulated data, always labelled ----- */
 #demoTag { display: none; margin-top: 6px; background: #fff; color: var(--blue); font-size: 10px; letter-spacing: .14em; padding: 3px 6px; border-radius: 3px; text-transform: uppercase; }
 .demo #demoTag { display: inline-block; cursor: pointer; } .demo #src { display: none; }
-#edit { position: absolute; left: 0; right: 0; top: 1090px; height: 360px; background: var(--blue); border-top: 1px solid rgba(255,255,255,.35); padding: 18px 36px; box-sizing: border-box; z-index: 3;
+#edit { position: absolute; left: 0; right: 0; bottom: 0; height: 360px; background: var(--blue); border-top: 1px solid rgba(255,255,255,.35); padding: 18px 36px; box-sizing: border-box; z-index: 3;
   transition: opacity .4s, transform .4s; }
 #edit.off { opacity: 0; transform: translateY(16px); pointer-events: none; }
 #edit .row2 { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
@@ -139,7 +142,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
   <div id="field" class="hidden"></div>
 
   <div id="console" class="hidden">
-    <div class="corner"><div><div id="clock"></div><div id="date"></div><div id="src"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div></div></div>
+    <div class="corner"><div><div id="date"></div><div id="src"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div><div id="clock"></div></div></div>
 
     <div class="pane" id="pStation">
       <div class="here"><label>You are here<button id="bStation">Change station</button></label><h1 id="oName"></h1><div class="lines" id="oLines" aria-live="polite"></div></div>
