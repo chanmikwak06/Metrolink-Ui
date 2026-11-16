@@ -2,7 +2,7 @@
 
 1080 × 1920 portrait passenger-information screen. Live: `https://chanmikwak06.github.io/Metrolink-Ui/station-screen/`
 
-**Design:** the original station screen is kept as it was: the full-height typographic poster, the opening opacity wave, the console ("You are here", line tags, "Where to?" list), and the trip view (journey line, countdown, departs, arrive, Change destination / Done). What changed is what drives it.
+**Design:** the original station screen is kept as it was: the full-height typographic poster, the opening opacity wave, the console ("You are here", line tags, "Where to?" list), and the trip view (next departure beside the journey line, Change destination). What changed is what drives it.
 
 | URL option | Effect |
 |---|---|

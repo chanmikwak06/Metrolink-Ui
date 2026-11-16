@@ -29,7 +29,6 @@
   const dayOf = ms => S.la(ms).ymd;
   const fmtClock = ms => { const s = new Date(ms).toLocaleTimeString('en-US', { timeZone: S.TZ, hour: 'numeric', minute: '2-digit' });
     return dayOf(ms) === dayOf(rt.now()) ? s : new Date(ms).toLocaleDateString('en-US', { timeZone: S.TZ, weekday: 'short' }) + ' ' + s; };
-  const mmss = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
   const ago = s => s < 60 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`;
   const routeOfTrip = trip => S.routes.find(r => r.i === trip.route);
   const serves = (L, st) => L.stops.includes(st);
@@ -216,20 +215,21 @@
 
     $('#rTitle').textContent = `${dn(station)}  →  ${dn(dest)}`; fitText($('#rTitle'), 40);
     const stops = legs.reduce((s, g) => s + (g.to - g.from), 0);
-    $('#rTags').replaceChildren(...[...lines].map(tag), make('span', 'tag', legs.length > 1 ? `${legs.length - 1} transfer${legs.length > 2 ? 's' : ''} · ${stops} stops` : `Direct · ${stops} stops`));
-    $('#sArrL').textContent = `Arrive ${dn(dest)}`;
+    // short tags in riding order: ribbon + line code, an arrow between lines
+    const short = L => { const t = make('span', 'tag'); t.append(ribbon(L), L.id); return t; };
+    $('#rTags').replaceChildren(...[...lines].flatMap((L, i) => i ? [make('span', 'to', '→'), short(L)] : [short(L)]), make('span', 'tag', legs.length > 1 ? `${legs.length - 1} transfer${legs.length > 2 ? 's' : ''} · ${stops} stops` : `Direct · ${stops} stops`));
     drawDiagram();
   }
 
-  // Journey line: dashed = your train on its way to you, solid = your ride; a tick for every stop.
-  const W = 1008, PAD = 8, Y = 62; // the line runs edge to edge of the console text column
+  // Journey line: dashed = your train on its way to you (every stop from its origin), solid = your ride; a tick for every stop.
+  const W = 708, PAD = 8, Y = 62; // the line runs from beside Next departure to the right margin
   let dx = () => 0, back = 0, D = 1;
   function drawDiagram() {
     const g = $('#diagram'); g.replaceChildren();
     const { legs, P } = trip;
-    back = Math.min(3, legs[0].from); D = back + legs.reduce((s, l) => s + (l.to - l.from), 0);
-    // Each leg gets an equal share of the line (approach a fixed 15%), so a short last leg never piles its labels up.
-    const span = W - 2 * PAD, bp = [[0, PAD], [back, PAD + (back ? .15 * span : 0)]];
+    back = legs[0].from; D = back + legs.reduce((s, l) => s + (l.to - l.from), 0); // the approach shows every stop since the train's origin
+    // Each leg gets an equal share of the line (approach 15–30%, growing with its stop count), so a short last leg never piles its labels up.
+    const span = W - 2 * PAD, bp = [[0, PAD], [back, PAD + (back ? Math.min(.3, Math.max(.15, back * .015)) * span : 0)]];
     legs.forEach((l, i) => bp.push([bp.at(-1)[0] + l.to - l.from, bp[1][1] + (i + 1) / legs.length * (W - PAD - bp[1][1])]));
     dx = d => { for (let i = 1; i < bp.length; i++) if (d <= bp[i][0] || i === bp.length - 1) { const [d0, x0] = bp[i - 1], [d1, x1] = bp[i]; return d1 === d0 ? x1 : x0 + (d - d0) / (d1 - d0) * (x1 - x0); } };
     if (back > 0) g.append(svg('line', { x1: PAD, x2: dx(back), y1: Y, y2: Y, stroke: '#fff', 'stroke-width': 2, 'stroke-dasharray': '4 6', opacity: .5 }));
@@ -255,15 +255,9 @@
     if (!pl) { toStation(); return; }
     const changed = pl.sig !== trip.sig; trip = pl;
     if (changed) { meAt = null; drawRoute(false); }
-    const x = trainOf(now), { p, pos, c } = x, first = trip.P[0], last = trip.P.at(-1);
-    if (now < p.arr) { $('#sLabel').textContent = 'Your train arrives in'; $('#sBig').textContent = mmss(p.arr - now); }
-    else { $('#sLabel').textContent = 'Boarding now · departs in'; $('#sBig').textContent = mmss(p.dep - now); }
-    const late = lateMin(p);
-    $('#sLoc').textContent = where(x) + (late >= 1 ? ` · ${late} min late` : '');
+    const x = trainOf(now), { p, pos, c } = x, late = lateMin(p);
     $('#sDep').textContent = fmtClock(p.dep);
-    $('#sTrack').textContent = p.track ? `Track ${p.track}${p.prevTrack && p.prevTrack !== p.track ? ` (was ${p.prevTrack})` : ''} · Train ${c.trip.no}` : `Train ${c.trip.no} · track not yet posted`;
-    $('#sArr').textContent = fmtClock(last.pa.arr);
-    $('#sDur').textContent = `${Math.round((last.pa.arr - first.pd.dep) / MIN)} min trip` + (p.source === 'live' ? '' : ' · scheduled');
+    $('#sTrack').textContent = (p.track ? `Track ${p.track}${p.prevTrack && p.prevTrack !== p.track ? ` (was ${p.prevTrack})` : ''} · Train ${c.trip.no}` : `Train ${c.trip.no} · Track not assigned`) + (late >= 1 ? ` · ${late} min late` : '');
     const bad = trip.conns.find(k => k.state !== 'ok'), rc = $('#rConn');
     rc.className = bad ? 'risk' : '';
     rc.textContent = bad ? `${bad.state === 'missed' ? 'Connection likely missed' : `Tight connection: ${Math.max(0, Math.floor(bad.slack))} min to change`} at ${dn(bad.at)}${bad.alt && bad.alt[0] ? ` · next option ${fmtClock(bad.alt[0].dep)}, arrive ${fmtClock(bad.alt.at(-1).arr)}` : ''}`
@@ -390,7 +384,6 @@
   field.addEventListener('pointerover', e => { const st = e.target.dataset && e.target.dataset.st; if (st != null && +st !== station) preview(+st); });
   field.addEventListener('pointerleave', () => step === 'select' && showStation(false));
   $('#bBack').addEventListener('click', () => toStation());
-  $('#bDone').addEventListener('click', () => toStation());
   $('#bStation').addEventListener('click', () => { pickMode = pickMode === 'dest' ? 'station' : 'dest'; buildList(); if (step === 'route') toStation(); idle = 0; });
   addEventListener('keydown', e => { idle = 0; if (e.key === 'Escape' && step === 'route') toStation(); });
   addEventListener('pointerdown', () => idle = 0);

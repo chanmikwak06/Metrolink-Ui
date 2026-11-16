@@ -95,18 +95,23 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 #rTitle { font-weight: 400; font-size: 40px; line-height: 1; margin: 8px 0 12px; letter-spacing: -.02em; }
 /* keep long names clear of the clock + logo corner; fitText() shrinks them */
 .here h1, #rTitle { margin-right: 300px; white-space: nowrap; }
-#diagram { position: absolute; left: 0; top: 104px; width: 1008px; height: 120px; overflow: visible; }
+/* Trip: next departure on the left, the journey line beside it */
+.next { position: absolute; left: 0; top: 150px; width: 270px; }
+.next b { display: block; font-weight: 400; font-size: 56px; line-height: 1; margin-top: 12px; letter-spacing: -.02em; white-space: nowrap; }
+.next p { margin: 10px 0 0; font-size: 13px; opacity: .78; }
+#rTags .tag { display: inline-flex; align-items: center; }
+#rTags .to { opacity: .7; margin: 0 -8px; }
+#diagram { position: absolute; left: 300px; top: 172px; width: 708px; height: 120px; overflow: visible; }
 #diagram text { fill: #fff; font-family: 'Anta', sans-serif; }
 #dTrain { filter: drop-shadow(0 0 6px #fff); }
-.stats { position: absolute; left: 0; right: 0; top: 244px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 18px; }
-.stats big { display: block; font-size: 60px; line-height: 1; margin-top: 8px; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.stats b { display: block; font-weight: 400; font-size: 34px; line-height: 1; margin-top: 8px; }
-.stats p { margin: 8px 0 0; font-size: 13px; opacity: .78; }
 #rConn { position: absolute; left: 0; bottom: 6px; font-size: 13px; max-width: 640px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .78; }
 #rConn.risk { background: #fff; color: var(--blue); padding: 3px 8px; border-radius: 3px; opacity: 1; }
-.actions { position: absolute; right: 0; bottom: 0; display: flex; gap: 12px; }
-.actions button { border: 1px solid rgba(255,255,255,.7); border-radius: 6px; padding: 9px 18px; font-size: 14px; }
-.actions button:hover, .actions button:focus-visible { background: #fff; color: var(--blue); outline: none; }
+/* Change destination sits top right, just left of the clock */
+/* Trip view corner: date, clock, then Change destination as an underlined link (no source line) */
+#bBack { display: none; margin-top: 16px; font-size: 15px; text-decoration: underline; text-underline-offset: 6px; }
+#bBack:hover, #bBack:focus-visible { outline: none; opacity: .8; }
+#console:has(#pRoute.show) #bBack { display: inline-block; }
+#console:has(#pRoute.show) #src { display: none; } /* the Demo tag stays: simulated data is always labelled */
 
 /* ---------- Opening ---------- */
 /* An opacity wave rolls down the map, row by row: each word swells in, eases back, and settles at full. --wv = its place in the wave. */
@@ -142,7 +147,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
   <div id="field" class="hidden"></div>
 
   <div id="console" class="hidden">
-    <div class="corner"><div><div id="date"></div><div id="src"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div><div id="clock"></div></div></div>
+    <div class="corner"><div><div id="date"></div><div id="src"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div><div id="clock"></div><button id="bBack">Change destination</button></div></div>
 
     <div class="pane" id="pStation">
       <div class="here"><label>You are here<button id="bStation">Change station</button></label><h1 id="oName"></h1><div class="lines" id="oLines" aria-live="polite"></div></div>
@@ -151,14 +156,9 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 
     <div class="pane" id="pRoute">
       <label>Your trip</label><h2 id="rTitle"></h2><div class="tags" id="rTags"></div>
-      <svg id="diagram" viewBox="0 0 1008 120"></svg>
-      <div class="stats">
-        <div><label id="sLabel"></label><big id="sBig"></big><p id="sLoc"></p></div>
-        <div><label>Departs</label><b id="sDep"></b><p id="sTrack"></p></div>
-        <div><label id="sArrL"></label><b id="sArr"></b><p id="sDur"></p></div>
-      </div>
+      <div class="next"><label>Next departure</label><b id="sDep"></b><p id="sTrack"></p></div>
+      <svg id="diagram" viewBox="0 0 708 120"></svg>
       <div id="rConn"></div>
-      <div class="actions"><button id="bBack">Change destination</button><button id="bDone">Done</button></div>
     </div>
   </div>
 
