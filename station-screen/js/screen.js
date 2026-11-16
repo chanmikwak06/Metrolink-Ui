@@ -1,4 +1,4 @@
-// Screen layer: the original station-screen design (console on top, poster below, wave, trip timeline) driven by real data.
+// Screen layer: console on top, the network field below (js/network.js), trip timeline; all driven by real data.
 // Sched = official timetable, RT = live feeds or the separate Demo source. No data rules live here.
 (function () {
   const S = Sched, MIN = 60000;
@@ -32,38 +32,13 @@
   const ago = s => s < 60 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`;
   const routeOfTrip = trip => S.routes.find(r => r.i === trip.route);
   const serves = (L, st) => L.stops.includes(st);
-  const touches = (r, st) => r.a === st || r.b === st;
 
   // ---------------- Scale to screen ----------------
   const fit = () => $('#stage').style.setProperty('--s', Math.min(innerWidth / 1080, innerHeight / 1920));
   addEventListener('resize', fit); fit();
 
-  // ---------------- Build the poster field ----------------
-  const field = $('#field'), R = [], ST = [];
-  S.routes.forEach(L => {
-    const sec = make('div', 'sec'), head = make('div', 'row head');
-    [...L.name.split(' '), `[${L.id}]`].forEach(w => head.append(make('span', '', w)));
-    sec.append(head); R.push({ el: head, L, i: -1 });
-    L.rows = L.stops.slice(0, -1).map((a, i) => {
-      const b = L.stops[i + 1], el = make('div', 'row');
-      const add = (w, st) => { const s = make('span', st != null ? 'st' : '', w); if (st != null) { s.dataset.st = st; ST.push(s); } el.append(s); };
-      dn(a).split(' ').forEach(w => add(w, a)); add('—'); L.name.split(' ').forEach(w => add(w)); add('—'); dn(b).split(' ').forEach(w => add(w, b));
-      sec.append(el); const r = { el, L, i, a, b }; R.push(r); return r;
-    });
-    field.append(sec);
-  });
-  const trains = make('div'); trains.id = 'trains'; field.append(trains);
-
-  // level(row) -> 'on' | 'mid' | '' ; hl = stations to emphasise ; delay(row, k) -> ms
-  function paint(level, hl = new Set(), delay = () => 0) {
-    field.classList.add('focus');
-    R.forEach((r, k) => {
-      const lv = level(r);
-      r.el.classList.toggle('on', lv === 'on'); r.el.classList.toggle('mid', lv === 'mid');
-      r.el.style.setProperty('--d', delay(r, k) + 'ms');
-    });
-    ST.forEach(s => s.classList.toggle('hl', hl.has(+s.dataset.st)));
-  }
+  // ---------------- The network field ----------------
+  const field = $('#field'), net = Net.create(field, { S, dn });
 
   // ---------------- Trains in the field: every bar is a real train ----------------
   // Fractional stop index along a trip -> fractional index on its poster line (handles stops a trip skips).
@@ -72,15 +47,8 @@
     const a = L.stops.indexOf(trip.stops[i]), b = L.stops.indexOf(trip.stops[j]);
     return { L, P: a + f * (b - a) };
   }
-  // A train at poster index P on line L sits in row floor(P), at (P - row) of the row's width.
-  function placeTrain(el, L, P) {
-    const r = L.rows[Math.max(0, Math.min(Math.floor(P), L.rows.length - 1))], f = Math.max(0, Math.min(1, P - r.i));
-    el.style.left = r.el.offsetLeft + f * (r.el.offsetWidth - el.offsetWidth) + 'px';
-    el.style.top = r.el.offsetTop + 12 + 'px'; // underline position: rows are 14px, text sits above
-  }
-  const pool = new Map(); // call key -> { el, lab, L, P, target }
-  const me = make('div', 'train me'); trains.append(me);
-  let meAt = null;
+  const pool = new Map(); // call key -> { el, L, P, target }
+  let ap = null;          // the approaching train: { key, L, P (eased), target }
 
   // ---------------- This moment: trains for this station ----------------
   function upcoming(now) {
@@ -146,21 +114,16 @@
   }
 
   function showStation(withPick = true) {
-    paint(r => (r.i < 0 ? serves(r.L, station) : touches(r, station)) ? 'on' : serves(r.L, station) ? 'mid' : '', new Set([station]));
+    net.preview(null);
     if (withPick) $('#pick').classList.add('show');
   }
-  function preview(dest) {
-    if (step !== 'select') return;
-    paint(r => (r.i < 0 ? serves(r.L, dest) || serves(r.L, station) : touches(r, dest) || touches(r, station)) ? 'on' : '', new Set([station, dest]));
-  }
+  function preview(dest) { if (step === 'select') net.preview(dest); }
 
   function toStation() {
     step = 'station'; trip = null;
     $('#pRoute').classList.remove('show'); $('#pStation').classList.add('show'); $('#pick').classList.remove('show');
-    trains.classList.remove('quiet'); me.classList.remove('show'); meAt = null;
-    const k0 = R.findIndex(r => touches(r, station));
-    paint(r => (r.i < 0 ? serves(r.L, station) : touches(r, station)) ? 'on' : serves(r.L, station) ? 'mid' : '', new Set([station]), (r, k) => Math.abs(k - k0) * 7);
-    setTimeout(() => { if (step === 'station') { step = 'select'; showStation(); } }, 1400);
+    net.clearRoute(); net.setStation(station); net.preview(null); ap = null;
+    setTimeout(() => { if (step === 'station') { step = 'select'; showStation(); } }, 700);
   }
   function setStation(s) {
     station = s; pickMode = 'dest';
@@ -189,29 +152,18 @@
     if (dest === station || step === 'open') return;
     const pl = planFor(dest, rt.now());
     if (!pl) { $('#pickLbl').lastChild.textContent = `No scheduled trip to ${dn(dest)} in the next day`; return; }
-    step = 'route'; idle = 0; trip = pl; meAt = null;
+    step = 'route'; idle = 0; trip = pl; ap = null; net.preview(null);
     drawRoute(true);
-    trains.classList.add('quiet'); me.classList.add('show');
     $('#pStation').classList.remove('show'); $('#pRoute').classList.add('show');
     tickTrip();
   }
 
   const trainOf = now => { const f = trip.P[0], hit = upcoming(now).find(y => y.c.key === f.d.key); return hit || { c: f.d, p: f.pd, pos: RT.position(rt, f.d, f.pd) }; };
-  // Field + console for the current plan. wave = light the journey row by row (only when the trip first opens).
+  // Network + console for the current plan. wave = reveal the journey stop by stop (only when the trip first opens).
   function drawRoute(wave) {
-    const { legs, dest } = trip, g0 = legs[0], L0 = routeOfTrip(g0.trip);
-    const on = new Set(), mid = new Set(), order = new Map(), lines = new Set(); let n = 0;
-    legs.forEach(g => { const L = routeOfTrip(g.trip); lines.add(L);
-      for (let k = g.from; k < g.to; k++) { const a = L.stops.indexOf(g.trip.stops[k]), b = L.stops.indexOf(g.trip.stops[k + 1]);
-        for (let j = Math.min(a, b); j < Math.max(a, b); j++) { on.add(L.rows[j]); if (!order.has(L.rows[j])) order.set(L.rows[j], n++); } } });
-    // Rows your train still has to cover to reach you at half.
-    const x = trainOf(rt.now()), sI = L0.stops.indexOf(station);
-    if (x.pos.pos != null && x.pos.pos < g0.from) { const Pp = posterPos(g0.trip, x.pos.pos).P;
-      for (let j = Math.floor(Math.min(Pp, sI)); j < Math.max(Pp, sI); j++) if (L0.rows[j]) mid.add(L0.rows[j]); }
-    const k0 = R.indexOf(L0.rows[Math.min(sI, L0.rows.length - 1)]);
-    paint(r => r.i < 0 ? (lines.has(r.L) ? 'on' : '') : on.has(r) ? 'on' : mid.has(r) ? 'mid' : '',
-      new Set([station, dest, ...legs.slice(1).map(g => g.trip.stops[g.from])]),
-      wave ? (r, k) => order.has(r) ? 250 + order.get(r) * 70 : Math.abs(k - k0) * 4 : () => 0);
+    const { legs, dest } = trip, lines = new Set(legs.map(g => routeOfTrip(g.trip)));
+    // The approach path is on screen first; the journey then grows out of your station, stop by stop.
+    net.route(legs, routeOfTrip, { animate: wave, delay: wave ? 600 : 0 });
 
     $('#rTitle').textContent = `${dn(station)}  →  ${dn(dest)}`; fitText($('#rTitle'), 40);
     const stops = legs.reduce((s, g) => s + (g.to - g.from), 0);
@@ -254,7 +206,7 @@
     const now = rt.now(), pl = planFor(trip.dest, now);
     if (!pl) { toStation(); return; }
     const changed = pl.sig !== trip.sig; trip = pl;
-    if (changed) { meAt = null; drawRoute(false); }
+    if (changed) { drawRoute(false); }
     const x = trainOf(now), { p, pos, c } = x, late = lateMin(p);
     $('#sDep').textContent = fmtClock(p.dep);
     $('#sTrack').textContent = (p.track ? `Track ${p.track}${p.prevTrack && p.prevTrack !== p.track ? ` (was ${p.prevTrack})` : ''} · Train ${c.trip.no}` : `Train ${c.trip.no} · Track not assigned`) + (late >= 1 ? ` · ${late} min late` : '');
@@ -263,27 +215,44 @@
     rc.textContent = bad ? `${bad.state === 'missed' ? 'Connection likely missed' : `Tight connection: ${Math.max(0, Math.floor(bad.slack))} min to change`} at ${dn(bad.at)}${bad.alt && bad.alt[0] ? ` · next option ${fmtClock(bad.alt[0].dep)}, arrive ${fmtClock(bad.alt.at(-1).arr)}` : ''}`
       : trip.last ? 'Last trip of the day' : '';
     // Your train on the map and on the journey line: its real (or timetable) position, never a simulation.
+    setApproach(x, now);
     if (pos.pos != null && !p.canceled) {
-      meAt = posterPos(c.trip, pos.pos); me.classList.add('show');
       const d = Math.max(0, Math.min(D, back - (trip.legs[0].from - pos.pos)));
       $('#dTrain').setAttribute('transform', `translate(${dx(d)} 0)`); $('#dTrain').setAttribute('opacity', 1);
-    } else { meAt = null; me.classList.remove('show'); $('#dTrain').setAttribute('opacity', 0); }
+    } else $('#dTrain').setAttribute('opacity', 0);
+  }
+
+  // The train coming to this station, on the network: where the data puts it, and what kind of position that is.
+  const KIND = { reported: 'Live position', aging: 'Reported', stale: 'Last reported', estimated: 'Estimated position', scheduled: 'Scheduled position' };
+  function setApproach(x, now) {
+    if (!x || x.p.canceled) {
+      const nx = S.calls(station, now, now + 30 * 3600e3).find(c => !c.terminates);
+      ap = null; net.approach(null, nx ? `No trains in the next 3 hours · next ${nx.trip.no} ${fmtClock(nx.dep)}` : 'No scheduled trains'); return;
+    }
+    const tr = x.c.trip, L = routeOfTrip(tr), waiting = x.pos.pos == null;
+    const target = waiting ? L.stops.indexOf(tr.stops[0]) : posterPos(tr, x.pos.pos).P;
+    if (!ap || ap.key !== x.c.key || ap.L !== L) ap = { key: x.c.key, L, P: target };
+    ap.target = target;
+    const k = x.pos.kind, sub = rt.kind === 'demo' ? 'Demo · simulated position'
+      : waiting ? `Departs ${dn(tr.stops[0])} ${fmtClock(x.c.origin + tr.dep[0] * MIN)}`
+      : k === 'aging' || k === 'stale' ? `${KIND[k]} ${ago(x.pos.age)} ago` : KIND[k] || KIND.scheduled;
+    net.approach({ L, label: `${tr.no} → ${compact(tr.headsign).split('/')[0]} · ${when(x, now)}`, sub, waiting });
   }
 
   // ---------------- Once a second: trains, next trains, alert, clock ----------------
   function tick() {
-    const now = rt.now(), list = upcoming(now), near = new Map(list.filter(x => !x.p.canceled).slice(0, 3).map(x => [x.c.key, x]));
+    const now = rt.now(), list = upcoming(now);
+    if (!trip) setApproach(list.find(x => !x.p.canceled), now); // station view: the next train here
     // Every train on the network right now, where the data puts it.
     const keep = new Set();
     for (const c of S.running(now, 45 * MIN)) {
       const pr = RT.predict(rt, c), pos = RT.position(rt, c, pr);
       if (pr.canceled || pos.pos == null || pos.pos >= c.trip.stops.length - 1) continue;
       let t = pool.get(c.key);
-      if (!t) { t = { el: make('div', 'train'), lab: make('span', 'lab') }; t.el.append(t.lab); trains.append(t.el); pool.set(c.key, t); }
-      const at = posterPos(c.trip, pos.pos), x = near.get(c.key);
+      if (!t) { t = { el: net.dot() }; pool.set(c.key, t); }
+      const at = posterPos(c.trip, pos.pos);
       t.target = at.P; if (t.P == null || t.L !== at.L || pos.kind === 'stale') t.P = at.P; t.L = at.L;
-      t.el.className = 'train' + (pos.kind === 'scheduled' ? ' sched' : pos.kind === 'stale' ? ' stale' : '') + (x ? ' near' : '');
-      t.lab.textContent = x ? `${c.trip.no} · ${when(x, now)}` : '';
+      t.el.setAttribute('class', 'tr' + (pos.kind === 'scheduled' ? ' sched' : pos.kind === 'stale' ? ' stale' : '') + (ap && ap.key === c.key ? ' hide' : ''));
       keep.add(c.key);
     }
     for (const [k, t] of pool) if (!keep.has(k)) { t.el.remove(); pool.delete(k); }
@@ -327,8 +296,8 @@
   let lastT = performance.now();
   function frame(now) {
     const ease = REDUCED ? 1 : 1 - Math.exp(-(now - lastT) / 400); lastT = now; // time-based, so a throttled display still catches up
-    for (const t of pool.values()) { t.P += (t.target - t.P) * ease; placeTrain(t.el, t.L, t.P); }
-    if (meAt) placeTrain(me, meAt.L, meAt.P);
+    for (const t of pool.values()) { t.P += (t.target - t.P) * ease; net.place(t.el, t.L, t.P); }
+    if (ap) { ap.P += (ap.target - ap.P) * ease; net.approachAt(ap.P); }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -371,13 +340,12 @@
   const WAVE = 1500, SPREAD = 1300; // ms each word takes / ms for the wave to travel from the top of the map to the bottom
   function open() {
     step = 'open';
-    field.style.setProperty('--wave', WAVE + 'ms');
-    R.forEach(r => [...r.el.children].forEach(s =>
-      s.style.setProperty('--wv', Math.round(r.el.offsetTop / 1410 * SPREAD) + 'ms')));
+    net.intro(SPREAD, WAVE); net.layout(); // labels are placed once Anta is in, measured in their real font
     field.classList.add('intro'); field.classList.remove('hidden');
     setTimeout(() => { $('#console').classList.remove('hidden'); $('#pStation').classList.add('show'); }, SPREAD * .8);
     setTimeout(() => field.classList.remove('intro'), SPREAD + WAVE);
-    setTimeout(() => { idle = 0; toStation(); if (DEMO && rt.demo.dest != null) setTimeout(() => go(rt.demo.dest), 1500); }, SPREAD + WAVE + 80); // a beat after the wave lets go, so the dimming fades instead of snapping
+    const to = findStation(Q.get('to')) ?? (DEMO ? rt.demo.dest : null); // ?to=Station opens that trip: a repeatable route-reveal demo
+    setTimeout(() => { idle = 0; toStation(); if (to != null) setTimeout(() => go(to), 1500); }, SPREAD + WAVE + 80); // a beat after the wave lets go, so the dimming fades instead of snapping
   }
 
   field.addEventListener('click', e => { const st = e.target.dataset && e.target.dataset.st; if (st != null && +st !== station && step !== 'open') go(+st); });
@@ -395,5 +363,5 @@
   setInterval(() => alertIx++, 8000);
 
   stationText(); tick();
-  document.fonts.ready.then(open); // start once Anta is in, so rows are laid out in their final font
+  document.fonts.ready.then(open); // start once Anta is in, so labels are measured in their final font
 })();

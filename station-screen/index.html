@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anta&display=swap" rel="stylesheet">
 <style>
-:root { --blue: #0049BA; --rh: 14px; } /* the official network has 86 segments (the old poster had 72): 14 px rows keep the same 1410 px field */
+:root { --blue: #0049BA; }
 html, body { margin: 0; height: 100%; background: #00081a; overflow: hidden; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
@@ -16,32 +16,55 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #stage { position: absolute; left: 50%; top: 50%; width: 1080px; height: 1920px; transform: translate(-50%, -50%) scale(var(--s, .5));
   background: var(--blue); overflow: hidden; font-family: 'Anta', sans-serif; color: #fff; letter-spacing: -.006em; user-select: none; -webkit-user-select: none; }
 
-/* ---------- Poster field ---------- */
-#field { position: absolute; left: 36px; right: 36px; top: 478px; height: 1410px; } /* same 36 px margin as the console, so poster and text share edges */
-.sec { margin-top: var(--rh); }
-.sec:first-child { margin-top: 0; }
-.row { display: flex; justify-content: space-between; height: var(--rh); line-height: var(--rh); font-size: 11px; white-space: nowrap; }
-.row.head { text-transform: uppercase; }
-.row span { display: inline-block; transform-origin: center; transition: opacity .7s ease, transform .7s ease, text-shadow .7s ease; transition-delay: var(--d, 0ms); }
-.row span.st { cursor: pointer; }
-#field.hidden .row span { opacity: 0; }
-#field.focus .row span { opacity: .13; }
-#field.focus .row.mid span { opacity: .5; }
-#field.focus .row.on span { opacity: 1; }
-#field .row.on span.hl { transform: scale(1.22); text-shadow: 0 0 8px rgba(255,255,255,.75); }
-
-.train { position: absolute; height: 2px; width: 16px; border-radius: 1px; background: #fff; box-shadow: 0 0 6px #fff; opacity: .55; pointer-events: none; transition: opacity .6s; }
-/* Every bar is a real train: timetable position by default, reported position when live data is connected. */
-.train.sched { box-shadow: none; }
-.train.stale { opacity: .25; box-shadow: none; }
-.train.near { width: 24px; height: 3px; opacity: 1; box-shadow: 0 0 8px 1px rgba(255,255,255,.85); }
-.train .lab { position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%); font-size: 10px; line-height: 1; white-space: nowrap; text-shadow: 0 0 3px var(--blue), 0 0 3px var(--blue); }
-#trains.quiet .train .lab { opacity: 0; }
-#trains.quiet .train:not(.me) { opacity: 0; }
-#field.hidden .train { opacity: 0; }
-.train.me { width: 30px; height: 3px; opacity: 0; box-shadow: 0 0 10px 2px rgba(255,255,255,.85); }
-.train.me.show { opacity: 1; animation: blink 1.6s ease-in-out infinite; }
-@keyframes blink { 50% { box-shadow: 0 0 3px 0 rgba(255,255,255,.4); } }
+/* ---------- Network field: the whole system as fine lines, tiny nodes and microtype (js/network.js) ---------- */
+#field { position: absolute; left: 36px; right: 36px; top: 478px; height: 1410px; } /* same 36 px margin as the console */
+#net { position: absolute; inset: 0; width: 1008px; height: 1410px; overflow: visible; }
+#net text { font-family: 'Anta', sans-serif; fill: #fff; }
+/* Layered opacity: background recedes in the trip view but never disappears */
+#net .bg { transition: opacity .9s ease; }
+#net.focus .bg { opacity: .5; }
+.sd { fill: none; stroke: #fff; stroke-width: .6; stroke-opacity: .17; }
+.mt { font-size: 6px; letter-spacing: .06em; fill-opacity: .3; }
+.lane { fill: none; stroke-width: 1.2; stroke-opacity: .6; stroke-linecap: round; transition: stroke-opacity .6s, stroke-width .6s; }
+.lane.rel { stroke-opacity: 1; stroke-width: 1.8; }
+.nd { fill: #fff; fill-opacity: .7; transition: fill-opacity .5s; }
+.nd.x { fill: var(--blue); fill-opacity: 1; stroke: #fff; stroke-width: 1.1; stroke-opacity: .8; }
+.nd.fl { animation: flick 8s ease-in-out var(--fd) infinite; } /* ambient: a third of the nodes breathe, slowly */
+@keyframes flick { 50% { fill-opacity: .3; stroke-opacity: .35; } }
+.hit { fill: transparent; cursor: pointer; }
+/* labels and train text carry a thin brand-blue halo, so they read over tracks and texture */
+.lb, .apl, .aps, .ntag, .nos { paint-order: stroke; stroke: var(--blue); stroke-width: 3px; stroke-linejoin: round; }
+.lb { font-size: 10px; fill-opacity: .6; cursor: pointer; transition: fill-opacity .5s ease, filter .5s ease; }
+.lb.rel { fill-opacity: .78; }
+#net.focus .lb:not(.on):not(.me) { fill-opacity: .3; }
+.lb.on, .lb.pv { fill-opacity: 1; filter: drop-shadow(0 0 3px rgba(255,255,255,.6)); }
+.lb.me { font-size: 13px; fill-opacity: 1; }
+.ntag { font-size: 7px; letter-spacing: .18em; fill-opacity: .8; }
+/* Every dot is a real train (timetable or reported position) */
+.tr { fill: #fff; fill-opacity: .75; transition: fill-opacity .6s; pointer-events: none; }
+.tr.sched { fill-opacity: .55; } .tr.stale { fill-opacity: .25; } .tr.hide { fill-opacity: 0; }
+#net.focus .tr { fill-opacity: .2; }
+/* You are here */
+.yah .ring { fill: none; stroke: #fff; stroke-width: 1.6; }
+.yah .pulse { fill: none; stroke: #fff; stroke-width: 1; animation: ping 3.2s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes ping { 0% { transform: scale(1); opacity: .7; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+.nos { font-size: 9px; fill-opacity: .8; }
+/* Approaching train: dashed path that flows toward you; a capsule marks the train. Not the journey (that is solid + line colour). */
+.appr { transition: opacity .6s; } .appr.off { opacity: 0; }
+.ap { fill: none; stroke: #fff; stroke-width: 1.6; stroke-dasharray: 2 5; stroke-linecap: round; animation: flow 1.1s linear infinite; }
+.appr.wait .ap { animation: none; stroke-opacity: .6; }
+@keyframes flow { to { stroke-dashoffset: -7; } }
+.apm rect { fill: #fff; filter: drop-shadow(0 0 4px rgba(255,255,255,.9)); }
+.apl { font-size: 10px; } .aps { font-size: 7px; letter-spacing: .14em; fill-opacity: .75; }
+/* Route reveal: white core over the line colour, drawn stop by stop */
+.rt { transition: opacity .7s ease; } .rt.out { opacity: 0; }
+.ru { fill: none; stroke-width: 5.5; stroke-opacity: .95; stroke-linecap: round; stroke-linejoin: round; }
+.rc { fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rn { animation: pop .5s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes pop { from { opacity: 0; transform-origin: center; } to { opacity: 1; } }
+.rn circle { fill: #fff; } .rn.dest circle { fill: var(--blue); stroke: #fff; stroke-width: 2.2; }
+.rn.xfer rect { fill: #fff; stroke-width: 2.2; }
+.sig { fill: #fff; filter: drop-shadow(0 0 4px #fff); }
 
 /* ---------- Console (top quarter): open space below it separates it from the map ---------- */
 #console { position: absolute; left: 0; right: 0; top: 0; height: 470px; box-sizing: border-box; padding: 26px 36px;
@@ -71,7 +94,7 @@ label button { font-size: inherit; letter-spacing: inherit; text-transform: inhe
 #alert b { font-weight: 400; letter-spacing: .16em; text-transform: uppercase; font-size: 10px; flex: none; }
 #alert span { overflow: hidden; text-overflow: ellipsis; }
 label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; opacity: .7; }
-.corner { position: absolute; right: 36px; top: 40px; display: flex; align-items: flex-start; gap: 28px; text-align: right; }
+.corner { position: absolute; z-index: 2; right: 36px; top: 40px; display: flex; align-items: flex-start; gap: 28px; text-align: right; }
 /* date + data source sit above the clock; the clock lines up with the station name */
 #clock { font-size: 34px; line-height: 1; margin-top: 10px; }
 #date { font-size: 12px; opacity: .7; letter-spacing: .08em; }
@@ -108,15 +131,16 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 #rConn.risk { background: #fff; color: var(--blue); padding: 3px 8px; border-radius: 3px; opacity: 1; }
 /* Change destination sits top right, just left of the clock */
 /* Trip view corner: date, clock, then Change destination as an underlined link (no source line) */
-#bBack { display: none; margin-top: 16px; font-size: 15px; text-decoration: underline; text-underline-offset: 6px; }
-#bBack:hover, #bBack:focus-visible { outline: none; opacity: .8; }
+/* z-index above: the trip pane is laid over this corner and used to swallow real taps on the link */
+#bBack { display: none; margin-top: 16px; font-size: 15px; text-decoration: underline; text-underline-offset: 6px; opacity: .8; } /* same strength as Change station */
+#bBack:hover, #bBack:focus-visible { outline: none; opacity: 1; }
 #console:has(#pRoute.show) #bBack { display: inline-block; }
 #console:has(#pRoute.show) #src { display: none; } /* the Demo tag stays: simulated data is always labelled */
 
 /* ---------- Opening ---------- */
-/* An opacity wave rolls down the map, row by row: each word swells in, eases back, and settles at full. --wv = its place in the wave. */
-#field.hidden .row span { opacity: 0; }
-#field.intro .row span { animation: wave var(--wave) ease-in-out var(--wv, 0ms) both; }
+/* The network washes in top to bottom: each element swells in, eases back, settles. --y = its height on the map (0-1). */
+#field.hidden #net .w { opacity: 0; }
+#field.intro #net .w { animation: wave var(--wave) ease-in-out calc(var(--y) * var(--spread)) both; }
 @keyframes wave { 0% { opacity: 0; } 40% { opacity: 1; } 70% { opacity: .4; } 100% { opacity: 1; } }
 /* Console parts rise in one after another. */
 .corner, .here > * { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
@@ -178,6 +202,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 <script src="data/gtfs.js"></script>
 <script src="js/schedule.js"></script>
 <script src="js/realtime.js"></script>
+<script src="js/network.js"></script>
 <script src="js/screen.js"></script>
 </body>
 </html>

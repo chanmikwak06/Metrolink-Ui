@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metrolink Station Screen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anta&display=swap" rel="stylesheet">
+<style>
+:root { --blue: #0049BA; --rh: 14px; } /* the official network has 86 segments (the old poster had 72): 14 px rows keep the same 1410 px field */
+html, body { margin: 0; height: 100%; background: #00081a; overflow: hidden; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+/* 1080 x 1920 portrait screen (9:16). Everything is laid out on that canvas and scaled to fit. */
+#stage { position: absolute; left: 50%; top: 50%; width: 1080px; height: 1920px; transform: translate(-50%, -50%) scale(var(--s, .5));
+  background: var(--blue); overflow: hidden; font-family: 'Anta', sans-serif; color: #fff; letter-spacing: -.006em; user-select: none; -webkit-user-select: none; }
+
+/* ---------- Poster field ---------- */
+#field { position: absolute; left: 36px; right: 36px; top: 478px; height: 1410px; } /* same 36 px margin as the console, so poster and text share edges */
+.sec { margin-top: var(--rh); }
+.sec:first-child { margin-top: 0; }
+.row { display: flex; justify-content: space-between; height: var(--rh); line-height: var(--rh); font-size: 11px; white-space: nowrap; }
+.row.head { text-transform: uppercase; }
+.row span { display: inline-block; transform-origin: center; transition: opacity .7s ease, transform .7s ease, text-shadow .7s ease; transition-delay: var(--d, 0ms); }
+.row span.st { cursor: pointer; }
+#field.hidden .row span { opacity: 0; }
+#field.focus .row span { opacity: .13; }
+#field.focus .row.mid span { opacity: .5; }
+#field.focus .row.on span { opacity: 1; }
+#field .row.on span.hl { transform: scale(1.22); text-shadow: 0 0 8px rgba(255,255,255,.75); }
+
+.train { position: absolute; height: 2px; width: 16px; border-radius: 1px; background: #fff; box-shadow: 0 0 6px #fff; opacity: .55; pointer-events: none; transition: opacity .6s; }
+/* Every bar is a real train: timetable position by default, reported position when live data is connected. */
+.train.sched { box-shadow: none; }
+.train.stale { opacity: .25; box-shadow: none; }
+.train.near { width: 24px; height: 3px; opacity: 1; box-shadow: 0 0 8px 1px rgba(255,255,255,.85); }
+.train .lab { position: absolute; left: 50%; bottom: 5px; transform: translateX(-50%); font-size: 10px; line-height: 1; white-space: nowrap; text-shadow: 0 0 3px var(--blue), 0 0 3px var(--blue); }
+#trains.quiet .train .lab { opacity: 0; }
+#trains.quiet .train:not(.me) { opacity: 0; }
+#field.hidden .train { opacity: 0; }
+.train.me { width: 30px; height: 3px; opacity: 0; box-shadow: 0 0 10px 2px rgba(255,255,255,.85); }
+.train.me.show { opacity: 1; animation: blink 1.6s ease-in-out infinite; }
+@keyframes blink { 50% { box-shadow: 0 0 3px 0 rgba(255,255,255,.4); } }
+
+/* ---------- Console (top quarter): open space below it separates it from the map ---------- */
+#console { position: absolute; left: 0; right: 0; top: 0; height: 470px; box-sizing: border-box; padding: 26px 36px;
+  transition: opacity .8s ease, transform .8s ease; }
+#console.hidden { opacity: 0; transform: translateY(-24px); }
+label button { font-size: inherit; letter-spacing: inherit; text-transform: inherit; margin-left: 14px; text-decoration: underline; text-underline-offset: 3px; opacity: .8; }
+#src { font-size: 10px; letter-spacing: .14em; opacity: .55; margin-top: 6px; text-transform: uppercase; }
+/* Lines down the left, each with its next trains beside it. */
+.lines { margin-top: 18px; }
+/* Everything in the console sits on the Where-to list's grid: 6 columns, 18 px gaps. A line takes 2 columns, each train 2. */
+.ln { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); column-gap: 18px; align-items: center; height: 22px; font-size: 14px; white-space: nowrap; }
+.ln > .tag, .ln .nt { grid-column: span 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ln .trs { display: contents; }
+.ln .nt { display: flex; align-items: center; gap: 7px; }
+.ln .none { grid-column: span 4; overflow: hidden; text-overflow: ellipsis; }
+.ln em { font-style: normal; opacity: .6; }
+.ln .late { background: #fff; color: var(--blue); padding: 0 5px; border-radius: 3px; font-size: 12px; }
+.ln .x { opacity: .45; text-decoration: line-through; }
+/* The station pane stacks: here, then the list right below however many lines there are. */
+#pStation { display: flex; flex-direction: column; }
+/* L.A. Union Station (6 lines): tighter rows and a 7th list column so everything still fits */
+.many .ln { height: 18px; grid-template-columns: repeat(7, minmax(0, 1fr)); } .many .pick { margin-top: 8px; } .many #destList { columns: 7; }
+/* Service alert: one white line in the gap between console and map, only when there is one. */
+#alert { position: absolute; left: 36px; right: 36px; top: 436px; height: 26px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #fff; color: var(--blue); border-radius: 3px;
+  font-size: 12px; white-space: nowrap; overflow: hidden; transition: opacity .6s; }
+#alert.off { opacity: 0; pointer-events: none; }
+#alert b { font-weight: 400; letter-spacing: .16em; text-transform: uppercase; font-size: 10px; flex: none; }
+#alert span { overflow: hidden; text-overflow: ellipsis; }
+label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; opacity: .7; }
+.corner { position: absolute; right: 36px; top: 40px; display: flex; align-items: flex-start; gap: 28px; text-align: right; }
+/* date + data source sit above the clock; the clock lines up with the station name */
+#clock { font-size: 34px; line-height: 1; margin-top: 10px; }
+#date { font-size: 12px; opacity: .7; letter-spacing: .08em; }
+.pane { position: absolute; inset: 40px 36px 16px; opacity: 0; transform: translateY(14px); pointer-events: none; transition: opacity .6s ease, transform .6s ease; }
+.pane.show { opacity: 1; transform: none; pointer-events: auto; }
+
+.here h1 { font-weight: 400; font-size: 54px; line-height: 1; margin: 10px 0 0; letter-spacing: -.02em; }
+.tags { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
+.tag svg { width: 26px; height: 12px; margin-right: 8px; vertical-align: -1px; }
+.tag em { font-style: normal; opacity: .6; margin-left: 4px; }
+.pick { position: relative; margin-top: 24px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
+.pick.show { opacity: 1; transform: none; }
+.pick:not(.show) { pointer-events: none; }
+/* hint starts on the list's 2nd column (1 column + 1 gap) */
+.pick label span { position: absolute; left: calc((100% - 90px) / 6 + 18px); text-transform: none; letter-spacing: 0; opacity: .8; }
+.many .pick label span { left: calc((100% - 108px) / 7 + 18px); }
+#destList { margin-top: 14px; columns: 6; column-gap: 18px; }
+#destList button { display: block; width: 100%; text-align: left; font-size: 13px; line-height: 18px; opacity: .82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#destList button:hover, #destList button:focus-visible { opacity: 1; outline: none; text-decoration: underline; text-underline-offset: 3px; }
+
+#rTitle { font-weight: 400; font-size: 40px; line-height: 1; margin: 8px 0 12px; letter-spacing: -.02em; }
+/* keep long names clear of the clock + logo corner; fitText() shrinks them */
+.here h1, #rTitle { margin-right: 300px; white-space: nowrap; }
+/* Trip: next departure on the left, the journey line beside it */
+.next { position: absolute; left: 0; top: 150px; width: 270px; }
+.next b { display: block; font-weight: 400; font-size: 56px; line-height: 1; margin-top: 12px; letter-spacing: -.02em; white-space: nowrap; }
+.next p { margin: 10px 0 0; font-size: 13px; opacity: .78; }
+#rTags .tag { display: inline-flex; align-items: center; }
+#rTags .to { opacity: .7; margin: 0 -8px; }
+#diagram { position: absolute; left: 300px; top: 172px; width: 708px; height: 120px; overflow: visible; }
+#diagram text { fill: #fff; font-family: 'Anta', sans-serif; }
+#dTrain { filter: drop-shadow(0 0 6px #fff); }
+#rConn { position: absolute; left: 0; bottom: 6px; font-size: 13px; max-width: 640px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .78; }
+#rConn.risk { background: #fff; color: var(--blue); padding: 3px 8px; border-radius: 3px; opacity: 1; }
+/* Change destination sits top right, just left of the clock */
+/* Trip view corner: date, clock, then Change destination as an underlined link (no source line) */
+#bBack { display: none; margin-top: 16px; font-size: 15px; text-decoration: underline; text-underline-offset: 6px; }
+#bBack:hover, #bBack:focus-visible { outline: none; opacity: .8; }
+#console:has(#pRoute.show) #bBack { display: inline-block; }
+#console:has(#pRoute.show) #src { display: none; } /* the Demo tag stays: simulated data is always labelled */
+
+/* ---------- Opening ---------- */
+/* An opacity wave rolls down the map, row by row: each word swells in, eases back, and settles at full. --wv = its place in the wave. */
+#field.hidden .row span { opacity: 0; }
+#field.intro .row span { animation: wave var(--wave) ease-in-out var(--wv, 0ms) both; }
+@keyframes wave { 0% { opacity: 0; } 40% { opacity: 1; } 70% { opacity: .4; } 100% { opacity: 1; } }
+/* Console parts rise in one after another. */
+.corner, .here > * { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+#console.hidden .corner, #console.hidden .here > * { opacity: 0; transform: translateY(16px); }
+.here > :nth-child(1) { transition-delay: .15s; } .here > :nth-child(2) { transition-delay: .25s; } .here > :nth-child(3) { transition-delay: .38s; } .corner { transition-delay: .3s; }
+
+/* ----- Demo Mode (only with ?demo): simulated data, always labelled ----- */
+#demoTag { display: none; margin-top: 6px; background: #fff; color: var(--blue); font-size: 10px; letter-spacing: .14em; padding: 3px 6px; border-radius: 3px; text-transform: uppercase; }
+.demo #demoTag { display: inline-block; cursor: pointer; } .demo #src { display: none; }
+#edit { position: absolute; left: 0; right: 0; bottom: 0; height: 360px; background: var(--blue); border-top: 1px solid rgba(255,255,255,.35); padding: 18px 36px; box-sizing: border-box; z-index: 3;
+  transition: opacity .4s, transform .4s; }
+#edit.off { opacity: 0; transform: translateY(16px); pointer-events: none; }
+#edit .row2 { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
+#edit button { border: 1px solid rgba(255,255,255,.7); border-radius: 6px; padding: 8px 12px; font-size: 13px; }
+#edit button.on, #edit button:hover { background: #fff; color: var(--blue); }
+#edit .trains { display: flex; gap: 8px; overflow-x: auto; margin-top: 8px; }
+#edit .trains button { flex: none; }
+#route { width: 100%; margin: 14px 0 0; height: 36px; accent-color: #fff; }
+#routeTicks { position: relative; height: 16px; font-size: 10px; }
+#routeTicks span { position: absolute; transform: translateX(-50%); white-space: nowrap; opacity: .7; }
+#editInfo { font-size: 13px; margin-top: 8px; opacity: .8; min-height: 18px; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="field" class="hidden"></div>
+
+  <div id="console" class="hidden">
+    <div class="corner"><div><div id="date"></div><div id="src"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div><div id="clock"></div><button id="bBack">Change destination</button></div></div>
+
+    <div class="pane" id="pStation">
+      <div class="here"><label>You are here<button id="bStation">Change station</button></label><h1 id="oName"></h1><div class="lines" id="oLines" aria-live="polite"></div></div>
+      <div class="pick" id="pick"><label id="pickLbl"></label><div id="destList"></div></div>
+    </div>
+
+    <div class="pane" id="pRoute">
+      <label>Your trip</label><h2 id="rTitle"></h2><div class="tags" id="rTags"></div>
+      <div class="next"><label>Next departure</label><b id="sDep"></b><p id="sTrack"></p></div>
+      <svg id="diagram" viewBox="0 0 708 120"></svg>
+      <div id="rConn"></div>
+    </div>
+  </div>
+
+  <div id="alert" class="off" role="status"></div>
+
+  <div id="edit" class="off">
+    <label>Demo controls · select a train, drag it along its route</label>
+    <div class="trains" id="editTrains"></div>
+    <input type="range" id="route" min="0" max="1" step="0.01" aria-label="Train position along its route">
+    <div id="routeTicks"></div>
+    <div id="editInfo"></div>
+    <div class="row2" id="editCtl"></div>
+    <div class="row2" id="clockCtl"></div>
+  </div>
+</div>
+
+<script src="../data/gtfs.js"></script>
+<script src="../js/schedule.js"></script>
+<script src="../js/realtime.js"></script>
+<script src="screen.js"></script>
+</body>
+</html>

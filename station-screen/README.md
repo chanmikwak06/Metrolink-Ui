@@ -2,7 +2,7 @@
 
 1080 × 1920 portrait passenger-information screen. Live: `https://chanmikwak06.github.io/Metrolink-Ui/station-screen/`
 
-**Design:** the original station screen is kept as it was: the full-height typographic poster, the opening opacity wave, the console ("You are here", line tags, "Where to?" list), and the trip view (next departure beside the journey line, Change destination). What changed is what drives it.
+**Design (v3, network):** the console and trip view are unchanged. The map is now the whole system as one dense network (`js/network.js`): real stations at their real coordinates (evened out per axis, order kept), joined only along real line sequences, fine strands whose density follows service frequency, line names written along the tracks. Motion states: idle (living network, real trains as dots), you are here, the approaching train (dashed path flowing toward you, labelled Live / Scheduled / Last reported / Demo), and route reveal (the itinerary grows stop by stop in its line colours, transfer = diamond, destination = ring, then one slow signal). `v2/` is the frozen poster version, `v1/` the first.
 
 | URL option | Effect |
 |---|---|
@@ -11,6 +11,7 @@
 | `?speed=10` | Demo clock speed only. Ignored outside Demo Mode, so it can never distort real times. |
 | `?rt=https://your-proxy` | Live trip updates + train positions through the proxy in `proxy/worker.js`. |
 | `?embed` | Transparent letterbox (Framer iframe). |
+| `?to=San Bernardino-Downtown` | Opens that trip after the opening, so the route reveal can be reviewed on demand. |
 
 Files: `data/gtfs.js` (generated, official schedule) · `js/schedule.js` (timetable logic) · `js/realtime.js` (GTFS-RT decoding, freshness, Demo source) · `js/screen.js` (the original design's rendering) · `tools/build-gtfs.py` (rebuild data after each Metrolink schedule change, ~5×/year) · `proxy/worker.js` (keeps the API key private) · `v1/` (frozen first version).
 
