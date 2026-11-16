@@ -79,7 +79,8 @@
     };
     const tick = () => {
       // Direct alerts fetch works from curl but Chromium was refused CORS in testing (2026-11-14), so prefer the proxy when there is one.
-      poll('alerts', proxy ? proxy.replace(/\/$/, '') + '/alerts' : ALERTS_URL, f => rt.alerts = f.alerts);
+      const a = rt.status.alerts; // without a proxy, a refused direct fetch is retried every 5 min, not every 30 s
+      if (proxy || a.state !== 'error' || Date.now() - a.failedAt > 300000) poll('alerts', proxy ? proxy.replace(/\/$/, '') + '/alerts' : ALERTS_URL, f => rt.alerts = f.alerts);
       if (proxy) {
         poll('trips', proxy.replace(/\/$/, '') + '/trips', f => rt.trips = new Map(f.tripUpdates.map(u => [u.trip.tripId, u])));
         poll('vehicles', proxy.replace(/\/$/, '') + '/vehicles', f => rt.vehicles = new Map(f.vehicles.filter(v => v.trip).map(v => [v.trip.tripId, v])));

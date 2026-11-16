@@ -79,7 +79,7 @@
   }
 
   // ---------------- Steps ----------------
-  let step = 'open', trip = null, idle = 0, pickMode = 'dest', alertIx = 0, editing = false, selId = null;
+  let step = 'open', trip = null, idle = Date.now(), /* idle = time of the last touch (real time, so throttled timers can't stretch it) */ pickMode = 'dest', alertIx = 0, editing = false, selId = null;
   const lineRows = new Map(); // line -> the element listing its next trains
   // Line ribbon from the mobile prototype's Explore page (assets/explore/line-*.svg), filled per line.
   const RIBBON = 'M57.4978 0V14.904H41.0413C37.5206 14.904 34.1644 16.2414 31.8373 18.5712L31.6839 18.7202L23.0756 26.8821H0L19.2482 8.63451C24.7781 3.14552 32.713 0 41.0413 0H57.4978Z';
@@ -147,11 +147,16 @@
     return { dest, legs, P, conns, last: !next || next[0].day !== legs[0].day, sig: legs.map(l => l.trip.id + '@' + l.day).join() };
   }
 
+  // The hint beside "Where to?" can carry a short message (no trip found); it returns to the normal hint after 5 s.
+  let hintT = 0;
+  const hint = msg => { clearTimeout(hintT); const h = $('#pickLbl').lastChild; if (!h || pickMode !== 'dest') return;
+    h.textContent = msg || 'Tap a station below or anywhere on the map'; if (msg) hintT = setTimeout(() => hint(), 5000); };
   function go(dest) {
     if (dest === station || step === 'open') return;
     const pl = planFor(dest, rt.now());
-    if (!pl) { $('#pickLbl').lastChild.textContent = `No scheduled trip to ${dn(dest)} in the next day`; return; }
-    step = 'route'; idle = 0; trip = pl; ap = null; net.preview(null);
+    if (!pl) { hint(`No scheduled trip to ${dn(dest)} in the next day`); return; }
+    hint();
+    step = 'route'; idle = Date.now(); trip = pl; ap = null; net.preview(null);
     drawRoute(true);
     $('#pStation').classList.remove('show'); $('#pRoute').classList.add('show');
     tickTrip();
@@ -351,7 +356,7 @@
     // The console and the Where-to list come in while the map is being revealed (not after it), in one smooth stagger.
     setTimeout(() => { $('#console').classList.remove('hidden'); $('#pStation').classList.add('show'); $('#pick').classList.add('show'); }, end ? net.timing.expand + 200 : 0);
     const to = findStation(Q.get('to')) ?? (DEMO ? rt.demo.dest : null); // ?to=Station opens that trip: a repeatable route-reveal demo
-    setTimeout(() => { idle = 0; step = 'select'; if (to != null) setTimeout(() => go(to), 600); }, end + 80); // ready to touch as soon as the motion ends
+    setTimeout(() => { idle = Date.now(); step = 'select'; if (to != null) setTimeout(() => go(to), 600); }, end + 80); // ready to touch as soon as the motion ends
   }
 
   // ---------------- Tap a train: a small card with what that train is doing ----------------
@@ -391,13 +396,14 @@
   field.addEventListener('pointerover', e => { const st = e.target.dataset && e.target.dataset.st; if (st != null && +st !== station) preview(+st); });
   field.addEventListener('pointerleave', () => step === 'select' && showStation(false));
   $('#bBack').addEventListener('click', () => toStation());
-  $('#bStation').addEventListener('click', () => { pickMode = pickMode === 'dest' ? 'station' : 'dest'; buildList(); if (step === 'route') toStation(); idle = 0; });
-  addEventListener('keydown', e => { idle = 0; if (e.key === 'Escape' && step === 'route') toStation(); });
-  addEventListener('pointerdown', () => idle = 0);
+  $('#bStation').addEventListener('click', () => { pickMode = pickMode === 'dest' ? 'station' : 'dest'; buildList(); if (step === 'route') toStation(); idle = Date.now(); });
+  addEventListener('keydown', e => { idle = Date.now(); if (e.key === 'Escape' && step === 'route') toStation(); });
+  addEventListener('pointerdown', () => idle = Date.now());
   setInterval(() => {
     tick();
-    if (step === 'route' && !editing && ++idle >= 90) toStation(); // 90 s without touch -> back to the station view
-    if (pickMode === 'station' && step !== 'route' && ++idle >= 45) { pickMode = 'dest'; buildList(); }
+    const quiet = Date.now() - idle;
+    if (step === 'route' && !editing && quiet >= 90000) toStation(); // 90 s without touch -> back to the station view
+    if (pickMode === 'station' && step !== 'route' && quiet >= 45000) { pickMode = 'dest'; buildList(); idle = Date.now(); }
   }, 1000);
   setInterval(() => alertIx++, 8000);
 
