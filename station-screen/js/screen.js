@@ -14,7 +14,7 @@
   // Names the earlier poster used, so old links (?station=Anaheim) keep working.
   const ALIAS = { losangelesunionstation: 'L.A. Union Station', anaheim: 'Anaheim - ARTIC', eastventura: 'Ventura - East', eastontario: 'Ontario - East', ontario: 'Ontario - East', pedley: 'Jurupa Valley / Pedley' };
   const findStation = q => { if (!q) return null; const n = norm(ALIAS[norm(q)] || q); const i = S.G.stops.findIndex(s => norm(s[0]) === n); return i >= 0 ? i : null; };
-  let station = findStation(Q.get('station')) ?? S.stopIx.get('Tustin');
+  let station = S.stopIx.get('L.A. Union Station'); // every first open starts at Union Station (where the opening resolves); ?station links are ignored
   console.assert(findStation('tustin') === S.stopIx.get('Tustin') && findStation('Anaheim') === S.stopIx.get('Anaheim - ARTIC') && findStation('nowhere') === null, 'station lookup');
   const DEMO = Q.has('demo');
   const rt = DEMO ? RT.createDemo({ scenario: Q.get('demo'), speed: Math.min(120, Math.max(1, +Q.get('speed') || 1)), station })
@@ -48,7 +48,7 @@
     return { L, P: a + f * (b - a) };
   }
   const pool = new Map(); // call key -> { el, L, P, target }
-  let ap = null;          // the approaching train: { key, L, P (eased), target }
+  let ap = null, apX = null; // the approaching train: { key, L, P (eased), target } and its data
 
   // ---------------- This moment: trains for this station ----------------
   function upcoming(now) {
@@ -127,7 +127,6 @@
   }
   function setStation(s) {
     station = s; pickMode = 'dest';
-    const u = new URL(location.href); u.searchParams.set('station', S.stopName(s)); history.replaceState(null, '', u);
     if (DEMO) { rt.demo.setStation(s); selId = null; }
     stationText(); tick(); toStation();
   }
@@ -163,7 +162,7 @@
   function drawRoute(wave) {
     const { legs, dest } = trip, lines = new Set(legs.map(g => routeOfTrip(g.trip)));
     // The approach path is on screen first; the journey then grows out of your station, stop by stop.
-    net.route(legs, routeOfTrip, { animate: wave, delay: wave ? 600 : 0 });
+    net.route(legs, routeOfTrip, { animate: wave, delay: wave ? 400 : 0 });
 
     $('#rTitle').textContent = `${dn(station)}  →  ${dn(dest)}`; fitText($('#rTitle'), 40);
     const stops = legs.reduce((s, g) => s + (g.to - g.from), 0);
@@ -174,7 +173,7 @@
   }
 
   // Journey line: dashed = your train on its way to you (every stop from its origin), solid = your ride; a tick for every stop.
-  const W = 708, PAD = 8, Y = 62; // the line runs from beside Next departure to the right margin
+  const W = 708, PAD = 8, Y = 70; // the line runs from beside Next departure to the right margin; text rows span the Next departure block top to bottom
   let dx = () => 0, back = 0, D = 1;
   function drawDiagram() {
     const g = $('#diagram'); g.replaceChildren();
@@ -191,14 +190,24 @@
     let acc = back;
     P.forEach((q, i) => { acc += q.l.to - q.l.from;
       keys.push(i === P.length - 1 ? { d: acc, name: dn(trip.dest), sub: 'Destination', t: q.pa.arr, kind: 'dest' } : { d: acc, name: dn(q.l.trip.stops[q.l.to]), sub: 'Change trains', t: P[i + 1].pd.dep, kind: 'xfer' }); });
-    keys.forEach(k => {
+    const cols = keys.map(k => {
       const cx = dx(k.d), anchor = cx < 140 ? 'start' : cx > W - 140 ? 'end' : 'middle', x = anchor === 'start' ? 0 : anchor === 'end' ? W : cx; // edge labels flush with the margins
       g.append(svg('circle', { cx, cy: Y, r: k.kind === 'origin' ? 7 : 6, fill: k.kind === 'origin' ? '#fff' : 'var(--blue)', stroke: '#fff', 'stroke-width': 2.5 }));
       const sub = svg('text', { x, y: 14, 'text-anchor': anchor, 'font-size': 10, 'letter-spacing': '.18em', opacity: .7 }); sub.textContent = k.sub.toUpperCase();
-      const nm = svg('text', { x, y: 36, 'text-anchor': anchor, 'font-size': 16 }); nm.textContent = k.name;
-      const tm = svg('text', { x, y: 96, 'text-anchor': anchor, 'font-size': 14, opacity: .8 }); tm.textContent = fmtClock(k.t);
+      const nm = svg('text', { x, y: 40, 'text-anchor': anchor, 'font-size': 16 }); nm.textContent = k.name;
+      const tm = svg('text', { x, y: 109.5, 'text-anchor': anchor, 'font-size': 14, opacity: .8 }); tm.textContent = fmtClock(k.t);
       g.append(sub, nm, tm);
+      return { els: [sub, nm, tm], a: anchor, x0: x, x };
     });
+    // Columns (title, name, time) never overlap: working right to left, a column that runs into the next one slides left
+    // (the destination stays flush right). If even that runs off the left edge, the names step down a size and try again.
+    const GAP = 18, ext = c => { const w = Math.max(...c.els.map(e => e.getComputedTextLength())), l = c.a === 'start' ? c.x : c.a === 'end' ? c.x - w : c.x - w / 2; return [l, l + w]; };
+    const put = (c, x) => { c.x = x; c.els.forEach(e => e.setAttribute('x', Math.round(x * 10) / 10)); };
+    for (let size = 16; size >= 11; size--) {
+      cols.forEach(c => { put(c, c.x0); c.els[1].setAttribute('font-size', size); });
+      for (let i = cols.length - 1; i > 0; i--) { const over = ext(cols[i - 1])[1] + GAP - ext(cols[i])[0]; if (over > 0) put(cols[i - 1], cols[i - 1].x - over); }
+      if (ext(cols[0])[0] >= -.5) break;
+    }
     g.append(svg('rect', { id: 'dTrain', x: -13, y: Y - 5, width: 26, height: 10, rx: 5, fill: '#fff' }));
   }
 
@@ -222,8 +231,7 @@
     } else $('#dTrain').setAttribute('opacity', 0);
   }
 
-  // The train coming to this station, on the network: where the data puts it, and what kind of position that is.
-  const KIND = { reported: 'Live position', aging: 'Reported', stale: 'Last reported', estimated: 'Estimated position', scheduled: 'Scheduled position' };
+  // The train coming to this station, on the network: where the data puts it, labelled with its number only.
   function setApproach(x, now) {
     if (!x || x.p.canceled) {
       const nx = S.calls(station, now, now + 30 * 3600e3).find(c => !c.terminates);
@@ -233,10 +241,7 @@
     const target = waiting ? L.stops.indexOf(tr.stops[0]) : posterPos(tr, x.pos.pos).P;
     if (!ap || ap.key !== x.c.key || ap.L !== L) ap = { key: x.c.key, L, P: target };
     ap.target = target;
-    const k = x.pos.kind, sub = rt.kind === 'demo' ? 'Demo · simulated position'
-      : waiting ? `Departs ${dn(tr.stops[0])} ${fmtClock(x.c.origin + tr.dep[0] * MIN)}`
-      : k === 'aging' || k === 'stale' ? `${KIND[k]} ${ago(x.pos.age)} ago` : KIND[k] || KIND.scheduled;
-    net.approach({ L, label: `${tr.no} → ${compact(tr.headsign).split('/')[0]} · ${when(x, now)}`, sub, waiting });
+    apX = x; net.approach({ L, key: x.c.key, label: `Train ${tr.no}`, waiting });
   }
 
   // ---------------- Once a second: trains, next trains, alert, clock ----------------
@@ -249,7 +254,8 @@
       const pr = RT.predict(rt, c), pos = RT.position(rt, c, pr);
       if (pr.canceled || pos.pos == null || pos.pos >= c.trip.stops.length - 1) continue;
       let t = pool.get(c.key);
-      if (!t) { t = { el: net.dot() }; pool.set(c.key, t); }
+      if (!t) { t = { el: net.dot(c.key) }; pool.set(c.key, t); }
+      Object.assign(t, { c, p: pr, pos }); // kept for the train's info card
       const at = posterPos(c.trip, pos.pos);
       t.target = at.P; if (t.P == null || t.L !== at.L || pos.kind === 'stale') t.P = at.P; t.L = at.L;
       t.el.setAttribute('class', 'tr' + (pos.kind === 'scheduled' ? ' sched' : pos.kind === 'stale' ? ' stale' : '') + (ap && ap.key === c.key ? ' hide' : ''));
@@ -273,11 +279,9 @@
     renderAlert(now, new Set(list.map(x => x.c.trip.id)));
     $('#clock').textContent = fmtClock(now);
     $('#date').textContent = new Date(now).toLocaleDateString('en-US', { timeZone: S.TZ, weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
-    const st = rt.status;
     if (DEMO) $('#demoTag').textContent = `Demo · ${rt.demo.scenario}${rt.demo.clock.paused ? ' · paused' : rt.demo.clock.speed > 1 ? ` · ${rt.demo.clock.speed}×` : ''}`;
-    $('#src').textContent = rt.kind === 'demo' ? `${rt.demo.scenario}${rt.demo.clock.paused ? ' · paused' : rt.demo.clock.speed > 1 ? ` · ${rt.demo.clock.speed}×` : ''}`
-      : rt.kind === 'schedule' ? 'Scheduled times' : st.trips.state === 'ok' ? 'Live' : 'Live data down · scheduled times';
     if (trip) tickTrip();
+    if (infoKey) { renderInfo(now); if (++infoT > 20) closeInfo(); } // the card stays current, and closes itself after 20 s
     if (editing) renderEditor(now, list);
   }
 
@@ -298,6 +302,7 @@
     const ease = REDUCED ? 1 : 1 - Math.exp(-(now - lastT) / 400); lastT = now; // time-based, so a throttled display still catches up
     for (const t of pool.values()) { t.P += (t.target - t.P) * ease; net.place(t.el, t.L, t.P); }
     if (ap) { ap.P += (ap.target - ap.P) * ease; net.approachAt(ap.P); }
+    if (infoKey) placeInfo();
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -336,19 +341,53 @@
   $('#demoTag').addEventListener('click', () => { editing = !editing; $('#edit').classList.toggle('off', !editing); tick(); });
 
   // ---------------- Opening ----------------
-  // Screen is live on load: an opacity wave rolls down the map, the console rises, then the view settles on "You are here".
-  const WAVE = 1500, SPREAD = 1300; // ms each word takes / ms for the wave to travel from the top of the map to the bottom
+  // Network expansion -> Union Station -> Metrolink map (js/network.js), then the console and "You are here".
   function open() {
     step = 'open';
-    net.intro(SPREAD, WAVE); net.layout(); // labels are placed once Anta is in, measured in their real font
-    field.classList.add('intro'); field.classList.remove('hidden');
-    setTimeout(() => { $('#console').classList.remove('hidden'); $('#pStation').classList.add('show'); }, SPREAD * .8);
-    setTimeout(() => field.classList.remove('intro'), SPREAD + WAVE);
+    net.setStation(station); // labels placed for the final map first (in Anta), so the reveal lands on the exact layout
+    field.classList.remove('hidden');
+    const end = net.opening(field.offsetTop); // 0 with reduced motion: the map is simply there
+    if (Q.has('hold') && end) { net.freeze(+Q.get('hold') || 0); return; } // ?hold=1800 freezes the opening at that moment, for design review
+    // The console and the Where-to list come in while the map is being revealed (not after it), in one smooth stagger.
+    setTimeout(() => { $('#console').classList.remove('hidden'); $('#pStation').classList.add('show'); $('#pick').classList.add('show'); }, end ? net.timing.expand + 200 : 0);
     const to = findStation(Q.get('to')) ?? (DEMO ? rt.demo.dest : null); // ?to=Station opens that trip: a repeatable route-reveal demo
-    setTimeout(() => { idle = 0; toStation(); if (to != null) setTimeout(() => go(to), 1500); }, SPREAD + WAVE + 80); // a beat after the wave lets go, so the dimming fades instead of snapping
+    setTimeout(() => { idle = 0; step = 'select'; if (to != null) setTimeout(() => go(to), 600); }, end + 80); // ready to touch as soon as the motion ends
   }
 
-  field.addEventListener('click', e => { const st = e.target.dataset && e.target.dataset.st; if (st != null && +st !== station && step !== 'open') go(+st); });
+  // ---------------- Tap a train: a small card with what that train is doing ----------------
+  const info = make('div', 'tinfo'); info.id = 'tinfo'; field.append(info);
+  let infoKey = null, infoT = 0;
+  const infoSrc = key => apX && apX.c.key === key ? apX : pool.get(key) || null; // the approaching train's data is its call at this station
+  function trainInfo({ c, p, pos }) {
+    const tr = c.trip, L = routeOfTrip(tr), n = tr.stops.length, d = (p.delay || 0) * 1000, at = j => c.origin + tr.arr[j] * MIN + d;
+    const q = pos.pos, onSt = q != null && Math.abs(q - Math.round(q)) < .02, late = lateMin(p);
+    const now = q == null ? `Departs ${dn(tr.stops[0])} ${fmtClock(c.origin + tr.dep[0] * MIN + d)}`
+      : onSt ? `At ${dn(tr.stops[Math.round(q)])}` : `Between ${dn(tr.stops[Math.floor(q)])} and ${dn(tr.stops[Math.floor(q) + 1])}`;
+    const nx = q == null ? 0 : onSt ? Math.round(q) + 1 : Math.floor(q) + 1, k = tr.stops.indexOf(station), rows = [['Now', now]];
+    if (nx < n - 1) rows.push(['Next stop', `${dn(tr.stops[nx])} · ${fmtClock(at(nx))}`]);
+    if (k >= 0 && k < n - 1 && (q == null || k > q + .02)) rows.push(['Arrives here', fmtClock(at(k))]);
+    rows.push(['Arrives ' + dn(tr.stops[n - 1]), fmtClock(at(n - 1))]);
+    rows.push(['Status', p.canceled ? 'Canceled' : late >= 1 ? `${late} min late` : late <= -1 ? `${-late} min early` : p.source === 'live' ? 'On time' : 'Scheduled']);
+    return { L, no: tr.no, to: compact(tr.headsign), rows };
+  }
+  function renderInfo() {
+    const s = infoSrc(infoKey); if (!s) return closeInfo();
+    const t = trainInfo(s), h = make('div', 'th');
+    h.append(ribbon(t.L), make('b', '', `Train ${t.no}`), make('em', '', `[${t.L.id}]`));
+    info.replaceChildren(h, make('div', 'tto', `→ ${t.to}`), ...t.rows.map(([a, b]) => { const r = make('div', 'irow'); r.append(make('span', '', a), make('b', '', b)); return r; }));
+  }
+  function placeInfo() { // beside the train, flipped to its left near the right edge, kept inside the map
+    const t = ap && ap.key === infoKey ? ap : pool.get(infoKey); if (!t) return;
+    const q = net.point(t.L, t.P), left = q.x > 1008 - 290;
+    info.style.left = (left ? q.x - 20 : q.x + 20) + 'px'; info.style.transform = left ? 'translateX(-100%)' : '';
+    info.style.top = Math.max(0, Math.min(1410 - info.offsetHeight, q.y - 26)) + 'px';
+  }
+  function showTrain(key) { infoKey = key; infoT = 0; renderInfo(); placeInfo(); info.classList.add('show'); }
+  function closeInfo() { infoKey = null; info.classList.remove('show'); }
+  addEventListener('pointerdown', e => { if (infoKey && !e.target.closest('#tinfo, [data-key]')) closeInfo(); });
+
+  field.addEventListener('click', e => { const tk = step !== 'open' && e.target.closest('[data-key]'); if (tk) { showTrain(tk.dataset.key); return; }
+    const st = e.target.dataset && e.target.dataset.st; if (st != null && +st !== station && step !== 'open') go(+st); });
   field.addEventListener('pointerover', e => { const st = e.target.dataset && e.target.dataset.st; if (st != null && +st !== station) preview(+st); });
   field.addEventListener('pointerleave', () => step === 'select' && showStation(false));
   $('#bBack').addEventListener('click', () => toStation());

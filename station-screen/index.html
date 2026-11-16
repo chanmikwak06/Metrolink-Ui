@@ -24,25 +24,30 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 #net .bg { transition: opacity .9s ease; }
 #net.focus .bg { opacity: .5; }
 .sd { fill: none; stroke: #fff; stroke-width: .6; stroke-opacity: .17; }
-.mt { font-size: 6px; letter-spacing: .06em; fill-opacity: .3; }
-.lane { fill: none; stroke-width: 1.2; stroke-opacity: .6; stroke-linecap: round; transition: stroke-opacity .6s, stroke-width .6s; }
-.lane.rel { stroke-opacity: 1; stroke-width: 1.8; }
+.lane { fill: none; stroke-width: 1.8; stroke-opacity: .6; stroke-linecap: round; transition: stroke-opacity .6s; } /* every line the same thickness; lines serving your station are only brighter */
+.lane.rel { stroke-opacity: 1; }
 .nd { fill: #fff; fill-opacity: .7; transition: fill-opacity .5s; }
-.nd.x { fill: var(--blue); fill-opacity: 1; stroke: #fff; stroke-width: 1.1; stroke-opacity: .8; }
-.nd.fl { animation: flick 8s ease-in-out var(--fd) infinite; } /* ambient: a third of the nodes breathe, slowly */
-@keyframes flick { 50% { fill-opacity: .3; stroke-opacity: .35; } }
+.nd.x { fill-opacity: .85; } /* interchanges: a slightly larger plain dot, no outline */
 .hit { fill: transparent; cursor: pointer; }
 /* labels and train text carry a thin brand-blue halo, so they read over tracks and texture */
-.lb, .apl, .aps, .ntag, .nos { paint-order: stroke; stroke: var(--blue); stroke-width: 3px; stroke-linejoin: round; }
-.lb { font-size: 10px; fill-opacity: .6; cursor: pointer; transition: fill-opacity .5s ease, filter .5s ease; }
+.lb, .apl, .ntag, .nos { paint-order: stroke; stroke: var(--blue); stroke-width: 3px; stroke-linejoin: round; }
+.lb { font-size: 10px; fill-opacity: .6; cursor: pointer; transition: fill-opacity .5s ease; }
 .lb.rel { fill-opacity: .78; }
 #net.focus .lb:not(.on):not(.me) { fill-opacity: .3; }
-.lb.on, .lb.pv { fill-opacity: 1; filter: drop-shadow(0 0 3px rgba(255,255,255,.6)); }
+.lb.on, .lb.pv { fill-opacity: 1; }
 .lb.me { font-size: 13px; fill-opacity: 1; }
 .ntag { font-size: 7px; letter-spacing: .18em; fill-opacity: .8; }
 /* Every dot is a real train (timetable or reported position) */
 .tr { fill: #fff; fill-opacity: .75; transition: fill-opacity .6s; pointer-events: none; }
-.tr.sched { fill-opacity: .55; } .tr.stale { fill-opacity: .25; } .tr.hide { fill-opacity: 0; }
+.tr.sched { fill-opacity: .55; } .tr.stale { fill-opacity: .25; } .tr.hide { fill-opacity: 0; } .tr.hide .thit { pointer-events: none; }
+.thit { fill: transparent; pointer-events: all; cursor: pointer; } /* tap target around each train */
+/* Train info card (tap a train): same blue, hairline border, the console's type */
+.tinfo { position: absolute; z-index: 3; min-width: 240px; box-sizing: border-box; padding: 12px 14px 10px; background: var(--blue); border: 1px solid rgba(255,255,255,.75); border-radius: 6px; font-size: 13px; line-height: 1.35; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+.tinfo.show { opacity: 1; pointer-events: auto; }
+.tinfo .th { display: flex; align-items: center; gap: 8px; font-size: 16px; } .tinfo .th svg { width: 26px; height: 12px; } .tinfo .th b { font-weight: 400; } .tinfo .th em { font-style: normal; font-size: 13px; opacity: .6; }
+.tinfo .tto { margin: 2px 0 6px; opacity: .85; }
+.tinfo .irow { display: flex; justify-content: space-between; gap: 18px; margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.18); }
+.tinfo .irow span { font-size: 9px; letter-spacing: .16em; text-transform: uppercase; opacity: .7; padding-top: 3px; } .tinfo .irow b { font-weight: 400; }
 #net.focus .tr { fill-opacity: .2; }
 /* You are here */
 .yah .ring { fill: none; stroke: #fff; stroke-width: 1.6; }
@@ -54,8 +59,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .ap { fill: none; stroke: #fff; stroke-width: 1.6; stroke-dasharray: 2 5; stroke-linecap: round; animation: flow 1.1s linear infinite; }
 .appr.wait .ap { animation: none; stroke-opacity: .6; }
 @keyframes flow { to { stroke-dashoffset: -7; } }
-.apm rect { fill: #fff; filter: drop-shadow(0 0 4px rgba(255,255,255,.9)); }
-.apl { font-size: 10px; } .aps { font-size: 7px; letter-spacing: .14em; fill-opacity: .75; }
+.apm rect { fill: #fff; }
+.apl { font-size: 10px; }
 /* Route reveal: white core over the line colour, drawn stop by stop */
 .rt { transition: opacity .7s ease; } .rt.out { opacity: 0; }
 .ru { fill: none; stroke-width: 5.5; stroke-opacity: .95; stroke-linecap: round; stroke-linejoin: round; }
@@ -64,14 +69,13 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 @keyframes pop { from { opacity: 0; transform-origin: center; } to { opacity: 1; } }
 .rn circle { fill: #fff; } .rn.dest circle { fill: var(--blue); stroke: #fff; stroke-width: 2.2; }
 .rn.xfer rect { fill: #fff; stroke-width: 2.2; }
-.sig { fill: #fff; filter: drop-shadow(0 0 4px #fff); }
+.sig { fill: #fff; }
 
 /* ---------- Console (top quarter): open space below it separates it from the map ---------- */
 #console { position: absolute; left: 0; right: 0; top: 0; height: 470px; box-sizing: border-box; padding: 26px 36px;
   transition: opacity .8s ease, transform .8s ease; }
-#console.hidden { opacity: 0; transform: translateY(-24px); }
+#console.hidden { opacity: 0; } /* the console only fades; its parts rise on their own (below), so nothing moves against anything else */
 label button { font-size: inherit; letter-spacing: inherit; text-transform: inherit; margin-left: 14px; text-decoration: underline; text-underline-offset: 3px; opacity: .8; }
-#src { font-size: 10px; letter-spacing: .14em; opacity: .55; margin-top: 6px; text-transform: uppercase; }
 /* Lines down the left, each with its next trains beside it. */
 .lines { margin-top: 18px; }
 /* Everything in the console sits on the Where-to list's grid: 6 columns, 18 px gaps. A line takes 2 columns, each train 2. */
@@ -85,8 +89,9 @@ label button { font-size: inherit; letter-spacing: inherit; text-transform: inhe
 .ln .x { opacity: .45; text-decoration: line-through; }
 /* The station pane stacks: here, then the list right below however many lines there are. */
 #pStation { display: flex; flex-direction: column; }
-/* L.A. Union Station (6 lines): tighter rows and a 7th list column so everything still fits */
-.many .ln { height: 18px; grid-template-columns: repeat(7, minmax(0, 1fr)); } .many .pick { margin-top: 8px; } .many #destList { columns: 7; }
+/* L.A. Union Station (6 lines): same rows and same 6-column grid as every other station; the alert and the map move down to make room */
+#stage:has(#pStation.many) #field { top: 506px; } /* map just under the longer list; Oceanside keeps a margin at the bottom edge */
+#stage:has(#pStation.many) #alert { top: 520px; }
 /* Service alert: one white line in the gap between console and map, only when there is one. */
 #alert { position: absolute; left: 36px; right: 36px; top: 436px; height: 26px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #fff; color: var(--blue); border-radius: 3px;
   font-size: 12px; white-space: nowrap; overflow: hidden; transition: opacity .6s; }
@@ -105,12 +110,11 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 .tags { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
 .tag svg { width: 26px; height: 12px; margin-right: 8px; vertical-align: -1px; }
 .tag em { font-style: normal; opacity: .6; margin-left: 4px; }
-.pick { position: relative; margin-top: 24px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
+.pick { position: relative; margin-top: 24px; opacity: 0; transform: translateY(12px); transition: opacity .7s cubic-bezier(.2,.7,.2,1) .18s, transform .7s cubic-bezier(.2,.7,.2,1) .18s; }
 .pick.show { opacity: 1; transform: none; }
 .pick:not(.show) { pointer-events: none; }
 /* hint starts on the list's 2nd column (1 column + 1 gap) */
 .pick label span { position: absolute; left: calc((100% - 90px) / 6 + 18px); text-transform: none; letter-spacing: 0; opacity: .8; }
-.many .pick label span { left: calc((100% - 108px) / 7 + 18px); }
 #destList { margin-top: 14px; columns: 6; column-gap: 18px; }
 #destList button { display: block; width: 100%; text-align: left; font-size: 13px; line-height: 18px; opacity: .82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #destList button:hover, #destList button:focus-visible { opacity: 1; outline: none; text-decoration: underline; text-underline-offset: 3px; }
@@ -119,14 +123,13 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 /* keep long names clear of the clock + logo corner; fitText() shrinks them */
 .here h1, #rTitle { margin-right: 300px; white-space: nowrap; }
 /* Trip: next departure on the left, the journey line beside it */
-.next { position: absolute; left: 0; top: 150px; width: 270px; }
+.next { position: absolute; left: 0; top: 170px; width: 270px; }
 .next b { display: block; font-weight: 400; font-size: 56px; line-height: 1; margin-top: 12px; letter-spacing: -.02em; white-space: nowrap; }
 .next p { margin: 10px 0 0; font-size: 13px; opacity: .78; }
 #rTags .tag { display: inline-flex; align-items: center; }
 #rTags .to { opacity: .7; margin: 0 -8px; }
-#diagram { position: absolute; left: 300px; top: 172px; width: 708px; height: 120px; overflow: visible; }
+#diagram { position: absolute; left: 300px; top: 165.5px; width: 708px; height: 120px; overflow: visible; }
 #diagram text { fill: #fff; font-family: 'Anta', sans-serif; }
-#dTrain { filter: drop-shadow(0 0 6px #fff); }
 #rConn { position: absolute; left: 0; bottom: 6px; font-size: 13px; max-width: 640px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: .78; }
 #rConn.risk { background: #fff; color: var(--blue); padding: 3px 8px; border-radius: 3px; opacity: 1; }
 /* Change destination sits top right, just left of the clock */
@@ -135,21 +138,20 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 #bBack { display: none; margin-top: 16px; font-size: 15px; text-decoration: underline; text-underline-offset: 6px; opacity: .8; } /* same strength as Change station */
 #bBack:hover, #bBack:focus-visible { outline: none; opacity: 1; }
 #console:has(#pRoute.show) #bBack { display: inline-block; }
-#console:has(#pRoute.show) #src { display: none; } /* the Demo tag stays: simulated data is always labelled */
 
 /* ---------- Opening ---------- */
-/* The network washes in top to bottom: each element swells in, eases back, settles. --y = its height on the map (0-1). */
-#field.hidden #net .w { opacity: 0; }
-#field.intro #net .w { animation: wave var(--wave) ease-in-out calc(var(--y) * var(--spread)) both; }
-@keyframes wave { 0% { opacity: 0; } 40% { opacity: 1; } 70% { opacity: .4; } 100% { opacity: 1; } }
+/* Network expansion -> Union Station -> Metrolink map: choreographed in js/network.js (opening). */
+#field.hidden #net { opacity: 0; }
+.ufocus { fill: none; stroke: #fff; stroke-width: 1.4; pointer-events: none; }
 /* Console parts rise in one after another. */
-.corner, .here > * { transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
-#console.hidden .corner, #console.hidden .here > * { opacity: 0; transform: translateY(16px); }
-.here > :nth-child(1) { transition-delay: .15s; } .here > :nth-child(2) { transition-delay: .25s; } .here > :nth-child(3) { transition-delay: .38s; } .corner { transition-delay: .3s; }
+/* one easing for every part, a short stagger top to bottom: label, name, lines (and the clock), then the list (.pick, +.18 s) */
+.corner, .here > * { transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+#console.hidden .corner, #console.hidden .here > * { opacity: 0; transform: translateY(12px); }
+.here > :nth-child(1) { transition-delay: 0s; } .here > :nth-child(2) { transition-delay: .06s; } .here > :nth-child(3) { transition-delay: .12s; } .corner { transition-delay: .06s; }
 
 /* ----- Demo Mode (only with ?demo): simulated data, always labelled ----- */
 #demoTag { display: none; margin-top: 6px; background: #fff; color: var(--blue); font-size: 10px; letter-spacing: .14em; padding: 3px 6px; border-radius: 3px; text-transform: uppercase; }
-.demo #demoTag { display: inline-block; cursor: pointer; } .demo #src { display: none; }
+.demo #demoTag { display: inline-block; cursor: pointer; }
 #edit { position: absolute; left: 0; right: 0; bottom: 0; height: 360px; background: var(--blue); border-top: 1px solid rgba(255,255,255,.35); padding: 18px 36px; box-sizing: border-box; z-index: 3;
   transition: opacity .4s, transform .4s; }
 #edit.off { opacity: 0; transform: translateY(16px); pointer-events: none; }
@@ -171,7 +173,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
   <div id="field" class="hidden"></div>
 
   <div id="console" class="hidden">
-    <div class="corner"><div><div id="date"></div><div id="src"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div><div id="clock"></div><button id="bBack">Change destination</button></div></div>
+    <div class="corner"><div><div id="date"></div><div id="demoTag" role="button" tabindex="0">Demo · simulated</div><div id="clock"></div><button id="bBack">Change destination</button></div></div>
 
     <div class="pane" id="pStation">
       <div class="here"><label>You are here<button id="bStation">Change station</button></label><h1 id="oName"></h1><div class="lines" id="oLines" aria-live="polite"></div></div>

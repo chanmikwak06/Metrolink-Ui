@@ -2,15 +2,16 @@
 
 1080 × 1920 portrait passenger-information screen. Live: `https://chanmikwak06.github.io/Metrolink-Ui/station-screen/`
 
-**Design (v3, network):** the console and trip view are unchanged. The map is now the whole system as one dense network (`js/network.js`): real stations at their real coordinates (evened out per axis, order kept), joined only along real line sequences, fine strands whose density follows service frequency, line names written along the tracks. Motion states: idle (living network, real trains as dots), you are here, the approaching train (dashed path flowing toward you, labelled Live / Scheduled / Last reported / Demo), and route reveal (the itinerary grows stop by stop in its line colours, transfer = diamond, destination = ring, then one slow signal). `v2/` is the frozen poster version, `v1/` the first.
+**Design (v3, network):** the console and trip view are unchanged. The map is now the whole system as one dense network (`js/network.js`): real stations at their real coordinates (evened out per axis, order kept), joined only along real line sequences, the same fine strand bundle around every line. Opening (about 4 s): an extended network draws in from beyond the screen and converges on Union Station, Union Station takes focus, then a front expands from it, erasing the extended lines and revealing the real map. Motion states: idle (real trains as dots), you are here, the approaching train (dashed path flowing toward you, labelled with its train number), and route reveal (the itinerary grows stop by stop in its line colours, transfer = diamond, destination = ring, then one slow signal). `v2/` is the frozen poster version, `v1/` the first.
 
 | URL option | Effect |
 |---|---|
-| `?station=Tustin` | Station this screen stands at (default Tustin). Any official GTFS name; old poster names such as `Anaheim` still work. Also changeable on screen ("Change station"). |
+| (current station) | Every first open starts at L.A. Union Station; `?station=` links are ignored. Riders can still pick another station on screen ("Change station"); it is not remembered after a reload. |
 | `?demo` or `?demo=delay` | **Demo Mode**: simulated conditions on the real timetable, simulated clock, labelled "Demo · simulated" under the clock. Tap that tag for the demo controls. Scenarios: `normal delay track cancel stale outage transfer last none`. |
 | `?speed=10` | Demo clock speed only. Ignored outside Demo Mode, so it can never distort real times. |
 | `?rt=https://your-proxy` | Live trip updates + train positions through the proxy in `proxy/worker.js`. |
 | `?embed` | Transparent letterbox (Framer iframe). |
+| `?hold=1800` | Freezes the opening animation at that moment (ms), to review a single frame. |
 | `?to=San Bernardino-Downtown` | Opens that trip after the opening, so the route reveal can be reviewed on demand. |
 
 Files: `data/gtfs.js` (generated, official schedule) · `js/schedule.js` (timetable logic) · `js/realtime.js` (GTFS-RT decoding, freshness, Demo source) · `js/screen.js` (the original design's rendering) · `tools/build-gtfs.py` (rebuild data after each Metrolink schedule change, ~5×/year) · `proxy/worker.js` (keeps the API key private) · `v1/` (frozen first version).
