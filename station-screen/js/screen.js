@@ -26,9 +26,7 @@
   // Official names, set the way the poster sets them (Laguna Niguel/Mission Viejo, Burbank Airport-North).
   const compact = s => s.replace(/ \((AV|VC) Line\)/, '').replace(/ - /g, '-').replace(/ \/ /g, '/');
   const dn = i => compact(S.stopName(i));
-  const dayOf = ms => S.la(ms).ymd;
-  const fmtClock = ms => { const s = new Date(ms).toLocaleTimeString('en-US', { timeZone: S.TZ, hour: 'numeric', minute: '2-digit' });
-    return dayOf(ms) === dayOf(rt.now()) ? s : new Date(ms).toLocaleDateString('en-US', { timeZone: S.TZ, weekday: 'short' }) + ' ' + s; };
+  const fmtClock = ms => new Date(ms).toLocaleTimeString('en-US', { timeZone: S.TZ, hour: 'numeric', minute: '2-digit' }); // time only, never a weekday
   const ago = s => s < 60 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`;
   const routeOfTrip = trip => S.routes.find(r => r.i === trip.route);
   const serves = (L, st) => L.stops.includes(st);
@@ -255,15 +253,17 @@
     if (!trip) setApproach(list.find(x => !x.p.canceled), now); // station view: the next train here
     // Every train on the network right now, where the data puts it.
     const keep = new Set();
+    net.svg.classList.toggle('hub', station === S.stopIx.get('L.A. Union Station')); // every line meets here, so every train matters
+    const mine = new Set(list.filter(x => !x.p.canceled).map(x => x.c.key)); // trains that will still stop here
     for (const c of S.running(now, 45 * MIN)) {
       const pr = RT.predict(rt, c), pos = RT.position(rt, c, pr);
       if (pr.canceled || pos.pos == null || pos.pos >= c.trip.stops.length - 1) continue;
       let t = pool.get(c.key);
-      if (!t) { t = { el: net.dot(c.key) }; pool.set(c.key, t); }
+      if (!t) { t = { el: net.dot(c.key, c.trip.no) }; pool.set(c.key, t); }
       Object.assign(t, { c, p: pr, pos }); // kept for the train's info card
       const at = posterPos(c.trip, pos.pos);
       t.target = at.P; if (t.P == null || t.L !== at.L || pos.kind === 'stale') t.P = at.P; t.L = at.L;
-      t.el.setAttribute('class', 'tr' + (pos.kind === 'scheduled' ? ' sched' : pos.kind === 'stale' ? ' stale' : '') + (ap && ap.key === c.key ? ' hide' : ''));
+      t.el.setAttribute('class', 'tr' + (pos.kind === 'scheduled' ? ' sched' : pos.kind === 'stale' ? ' stale' : '') + (mine.has(c.key) ? ' mine' : '') + (ap && ap.key === c.key ? ' hide' : ''));
       keep.add(c.key);
     }
     for (const [k, t] of pool) if (!keep.has(k)) { t.el.remove(); pool.delete(k); }

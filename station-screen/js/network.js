@@ -161,8 +161,19 @@
 
     // ---- trains on the network (every dot is a real train: timetable or reported position) ----
     // each train is a small dot with a larger invisible tap target around it (data-key = which train)
-    const dot = key => { const g = el('g', { class: 'tr', 'data-key': key }, gTr); el('circle', { r: 2.2 }, g); el('circle', { class: 'thit', r: 12 }, g); return g; };
-    function place(g, L, p) { const q = point(L, p); g.setAttribute('transform', `translate(${f1(q.x)} ${f1(q.y)})`); }
+    // every train is a small rounded rectangle turned along its line; trains that stop at your station (.mine),
+    // and every train at the Union Station hub (#net.hub), get a bigger one plus their number
+    const dot = (key, no = '') => {
+      const g = el('g', { class: 'tr', 'data-key': key }, gTr), body = el('g', { class: 'body' }, g);
+      el('rect', { class: 'sm', x: -3.5, y: -1.5, width: 7, height: 3, rx: 1.5 }, body);
+      el('rect', { class: 'big', x: -6.5, y: -2.4, width: 13, height: 4.8, rx: 2.4 }, body);
+      const t = el('text', { class: 'tl', x: 9, y: 3 }, g); t.textContent = no; el('circle', { class: 'thit', r: 12 }, g); return g;
+    };
+    function place(g, L, p) {
+      const q = point(L, p), n = L.stops.length - 1, a = point(L, Math.max(0, p - .03)), b = point(L, Math.min(n, p + .03)), body = g.querySelector('.body');
+      g.setAttribute('transform', `translate(${f1(q.x)} ${f1(q.y)})`);
+      if (body) body.setAttribute('transform', `rotate(${f1(Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI)})`); // along the line
+    }
 
     // ---- you are here ----
     const here = el('g', { class: 'yah' }, gMk);

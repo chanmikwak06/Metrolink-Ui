@@ -38,9 +38,17 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .lb.me { font-size: 13px; fill-opacity: 1; }
 .ntag { font-size: 7px; letter-spacing: .18em; fill-opacity: .8; }
 /* Every dot is a real train (timetable or reported position) */
-.tr { fill: #fff; fill-opacity: .75; transition: fill-opacity .6s; pointer-events: none; }
-.tr.sched { fill-opacity: .55; } .tr.stale { fill-opacity: .25; } .tr.hide { fill-opacity: 0; } .tr.hide .thit { pointer-events: none; }
+.tr { fill: #fff; fill-opacity: .4; transition: fill-opacity .6s; pointer-events: none; }
+.tr.hide .thit { pointer-events: none; }
 .thit { fill: transparent; pointer-events: all; cursor: pointer; } /* tap target around each train */
+/* Trains are small rectangles along their line. Trains that stop at your station are bigger, solid, and numbered;
+   the rest stay small and faint so they don't compete. At Union Station every line meets, so every train is shown that way. */
+.tr .big, .tr .tl { display: none; }
+.tr.mine, #net.hub .tr { fill-opacity: 1; }
+.tr.mine .sm, #net.hub .tr .sm { display: none; }
+.tr.mine .big, .tr.mine .tl, #net.hub .tr .big, #net.hub .tr .tl { display: inline; }
+.tr.mine.sched .big, #net.hub .tr.sched .big { fill-opacity: .8; } .tr.stale, #net.hub .tr.stale { fill-opacity: .3; } .tr.hide, #net.hub .tr.hide { fill-opacity: 0; }
+.tr .tl { font-size: 8px; fill-opacity: .9; paint-order: stroke; stroke: var(--blue); stroke-width: 2px; }
 /* Train info card (tap a train): same blue, hairline border, the console's type */
 .tinfo { position: absolute; z-index: 3; min-width: 240px; box-sizing: border-box; padding: 12px 14px 10px; background: var(--blue); border: 1px solid rgba(255,255,255,.75); border-radius: 6px; font-size: 13px; line-height: 1.35; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
 .tinfo.show { opacity: 1; pointer-events: auto; }
