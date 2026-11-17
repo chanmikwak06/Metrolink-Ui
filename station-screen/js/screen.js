@@ -408,5 +408,12 @@
   setInterval(() => alertIx++, 8000);
 
   stationText(); tick();
-  document.fonts.ready.then(open); // start once Anta is in, so labels are measured in their final font
+  // Start once Anta is in, so labels are measured in their final font.
+  // ?wait (embedded, e.g. the portfolio kiosk): stay on plain blue until the host page says the screen is fully in view.
+  const begin = () => document.fonts.ready.then(open);
+  if (Q.has('wait') && window.parent !== window) {
+    let started = false;
+    addEventListener('message', e => { if (!started && e.data && e.data.type === 'metrolink:start') { started = true; begin(); } });
+    window.parent.postMessage({ type: 'metrolink:ready' }, '*'); // lets a host that is already in view answer right away
+  } else begin();
 })();
