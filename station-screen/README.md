@@ -25,7 +25,7 @@ Files: `data/gtfs.js` (generated, official schedule) · `js/schedule.js` (timeta
 | Nothing about trains until you pick a destination | One line under the line tags: the next three trains here (`805 → Laguna Niguel/Mission Viejo 13 min`, white `+9` when late) | The screen helps without being touched |
 | Route = fewest transfers on the map, flat 7 min per stop, random 3–8 min wait, `Track index % 3` | Real timetable plan (earliest arrival, then fewest changes, 5 min to change), live or demo delays on top, track only when a feed posts one | Never claims a trip or a track that doesn't exist |
 | — | Trip view adds one line for a tight or missed connection (with the next real option) or "Last trip of the day" | Disruption guidance |
-| — | One white alert line between the console and the map, only when Metrolink has an active alert for this station's lines | Alerts without a permanent box |
+| — | One white alert card in the map's empty top-right corner, only when Metrolink has an active alert for this station's lines | Alerts without a permanent box |
 | — | "Change station" next to "You are here" turns the Where-to list into a station list | Any Metrolink station, same design |
 | Clock in the viewer's time zone | Pacific time always | Portfolio viewers elsewhere |
 
