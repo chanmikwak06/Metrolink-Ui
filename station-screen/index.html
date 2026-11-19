@@ -100,12 +100,13 @@ label button { font-size: inherit; letter-spacing: inherit; text-transform: inhe
 /* L.A. Union Station (6 lines): same rows and same 6-column grid as every other station; the alert and the map move down to make room */
 #stage:has(#pStation.many) #field { top: 506px; } /* map just under the longer list; Oceanside keeps a margin at the bottom edge */
 #stage:has(#pStation.many) #alert { top: 566px; } /* the longer list ends at 519; same 47 px gap as at other stations */
-/* Service alert: a white card in the map's empty top-right corner, top-aligned with the map, only when there is one. */
-#alert { position: absolute; right: 36px; top: 478px; width: 320px; max-height: 160px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: #fff; color: var(--blue); border-radius: 3px;
-  font-size: 13px; line-height: 1.4; overflow: hidden; transition: opacity .6s; }
-#alert.off { opacity: 0; pointer-events: none; }
-#alert b { font-weight: 400; letter-spacing: .16em; text-transform: uppercase; font-size: 10px; flex: none; }
-#alert span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
+/* Service alert: white text with the line's ribbon in the map's empty top-right corner, only when there is one.
+   It rises in exactly like the Where-to list (same easing, same +.18 s), and leaves the same way. */
+#alert { position: absolute; right: 36px; top: 478px; width: 320px; max-height: 160px; overflow: hidden; display: flex; flex-direction: column; gap: 8px;
+  transition: opacity .7s cubic-bezier(.2,.7,.2,1) .18s, transform .7s cubic-bezier(.2,.7,.2,1) .18s; }
+#alert.off, #stage:has(#console.hidden) #alert { opacity: 0; transform: translateY(12px); pointer-events: none; }
+#alert p { margin: 0; font-size: 14px; line-height: 1.45; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
+#alert p svg { width: 26px; height: 12px; margin-right: 8px; vertical-align: -1px; }
 label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; opacity: .7; }
 .corner { position: absolute; z-index: 2; right: 36px; top: 40px; display: flex; align-items: flex-start; gap: 28px; text-align: right; }
 /* date + data source sit above the clock; the clock lines up with the station name */

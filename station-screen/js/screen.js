@@ -298,7 +298,10 @@
     const el = $('#alert'); el.classList.toggle('off', !as.length);
     if (!as.length) return;
     const a = as[alertIx % as.length];
-    el.replaceChildren(make('b', '', a.demo ? 'Simulated' : 'Alert'), make('span', '', (a.header || '').trim().replace(/\s+/g, ' ')));
+    const lines = [...new Set(a.entities.map(e => S.routes.find(L => L.gtfs === e.routeId)).filter(Boolean))].slice(0, 3); // the lines it names, as in the line list
+    const msg = make('p'); msg.append(...lines.map(ribbon), (a.header || '').trim().replace(/\s+/g, ' '));
+    const lbl = make('label'); lbl.textContent = a.demo ? 'Simulated' : 'Alert';
+    el.replaceChildren(lbl, msg);
   }
 
   // ---------------- Main loop: glide each bar toward its data position (no invented movement) ----------------

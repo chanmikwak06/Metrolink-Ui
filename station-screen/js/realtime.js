@@ -155,7 +155,9 @@
     const rt = { kind: 'demo', now, alerts, trips: new Map(), vehicles: new Map(), onchange: () => {},
       status: { alerts: { state: 'ok' }, trips: { state: 'ok' }, vehicles: { state: 'ok' } } };
     const upcoming = () => Sched.calls(demo.station, now(), now() + 6 * 3600e3).filter(c => !c.terminates);
-    const sim = header => alerts.push({ id: 'demo', periods: [{ start: 0, end: Infinity }], entities: [], header, text: '', demo: true });
+    // a simulated alert names its train's real line and trip, like a real GTFS-RT alert would
+    const sim = (header, trip) => alerts.push({ id: 'demo', periods: [{ start: 0, end: Infinity }], header, text: '', demo: true,
+      entities: [{ routeId: Sched.routes.find(r => r.i === trip.route).gtfs, trip: { tripId: trip.id } }] });
 
     const demo = rt.demo = {
       clock, overrides: ov, scenario: 'normal', dest: null, station,
@@ -181,9 +183,9 @@
         up.forEach(c => ov.set(c.trip.id, { track: c.trip.dir === 0 ? '2' : '1' }));
         const set = (c, p) => ov.set(c.trip.id, { ...demo.get(c.trip.id), ...p });
         if (name === 'normal') up.forEach((c, i) => set(c, { delay: [0, 60, 0, 120][i % 4] }));
-        if (name === 'delay' && up[0]) { set(up[0], { delay: 9 * 60 }); sim(`Train ${up[0].trip.no} is running about 9 minutes late.`); }
+        if (name === 'delay' && up[0]) { set(up[0], { delay: 9 * 60 }); sim(`Train ${up[0].trip.no} is running about 9 minutes late.`, up[0].trip); }
         if (name === 'track' && up[0]) { const was = demo.get(up[0].trip.id).track; set(up[0], { track: was === '1' ? '2' : '1', prevTrack: was }); }
-        if (name === 'cancel' && up[1]) { set(up[1], { canceled: true }); sim(`Train ${up[1].trip.no} is canceled today.`); }
+        if (name === 'cancel' && up[1]) { set(up[1], { canceled: true }); sim(`Train ${up[1].trip.no} is canceled today.`, up[1].trip); }
         if (name === 'stale' && up[0]) set(up[0], { staleAt: now() - 7 * MIN });
         if (name === 'outage') rt.status.trips = rt.status.vehicles = { state: 'error', error: 'Simulated feed outage' };
         if (name === 'transfer') {
@@ -192,7 +194,7 @@
             if (p && p.length === 2 && p[1].dep - p[0].arr >= 6 * MIN && p[1].dep - p[0].arr <= 25 * MIN) {
               const slack = (p[1].dep - p[0].arr) / 1000;
               ov.set(p[0].trip.id, { ...demo.get(p[0].trip.id), delay: slack - 120 }); // lands 2 min before the connection leaves: under the 5 min needed
-              sim(`Train ${p[0].trip.no} is running about ${Math.round(slack / 60 - 2)} minutes late.`);
+              sim(`Train ${p[0].trip.no} is running about ${Math.round(slack / 60 - 2)} minutes late.`, p[0].trip);
               demo.dest = s; break;
             }
           }
