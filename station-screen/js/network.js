@@ -123,7 +123,7 @@
 
     // Label placement: horizontal and 45° spots around each node; pick the one that overlaps least with other labels,
     // other nodes and the tracks. Labels are checked as a chain of small boxes, so diagonal names fit between busy runs.
-    let labelBoxes = []; // where the station names ended up (the train's label steers clear of them)
+    let labelBoxes = [], trackBoxes = []; // where the station names ended up, and points along every track (train numbers steer clear of both)
     function layout() {
       const placed = [], ov = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
       const obst = P.map(p => [p.x - 4, p.y - 4, p.x + 4, p.y + 4, 4]);
@@ -156,7 +156,7 @@
         placed.push(...best.boxes);
         if (me) hereBoxes = [...best.boxes, [p.x - 42, p.y - 22, p.x + 42, p.y + 10]]; // the train's label keeps off your station
       });
-      labelBoxes = placed;
+      labelBoxes = placed; trackBoxes = obst.filter(o => o[4] === 1.5);
     }
 
     // ---- trains on the network (every dot is a real train: timetable or reported position) ----
@@ -169,10 +169,41 @@
       el('rect', { class: 'big', x: -6.5, y: -2.4, width: 13, height: 4.8, rx: 2.4 }, body);
       const t = el('text', { class: 'tl', x: 9, y: 3 }, g); t.textContent = no; el('circle', { class: 'thit', r: 12 }, g); return g;
     };
+    // Each train's number goes to the side of its bar (either side of the line, or past either end) that covers the
+    // fewest station names, station dots, tracks, other trains and their numbers, and the You-are-here mark.
+    // It is only re-chosen once the train has moved a few px, and only for a clearly better spot, so numbers never jitter.
+    const bars = new Map(); // train group -> { x, y, box: its bar, lb: its number's box, side, at: where the side was chosen }
+    const ovl = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+    function placeNumber(g, m, ang) {
+      const t = g.querySelector('.tl');
+      if (!t || !t.textContent || !(g.classList.contains('mine') || svg.classList.contains('hub'))) { m.lb = null; return; }
+      if (m.at && Math.hypot(m.x - m.at.x, m.y - m.at.y) < 3 && m.lb) return;
+      const w = t.getComputedTextLength() || t.textContent.length * 5, u = { x: Math.cos(ang), y: Math.sin(ang) }, v = { x: -u.y, y: u.x };
+      const along = 9 + w / 2 * Math.abs(u.x) + 4 * Math.abs(u.y), across = 6 + w / 2 * Math.abs(v.x) + 4 * Math.abs(v.y);
+      const spots = { l: [v.x * across, v.y * across, 0], r: [-v.x * across, -v.y * across, 0], f: [u.x * along, u.y * along, 6], b: [-u.x * along, -u.y * along, 6] };
+      let best = null;
+      for (const k in spots) {
+        const [dx, dy, pen] = spots[k], cx = m.x + dx, cy = m.y + dy, box = [cx - w / 2, cy - 4.5, cx + w / 2, cy + 4.5];
+        let sc = pen + (box[0] < 0 || box[2] > W || box[1] < 0 || box[3] > H ? 1e5 : 0);
+        for (const o of labelBoxes) sc += ovl(box, o) * 2;
+        for (const o of hereBoxes) sc += ovl(box, o) * 6;
+        for (const q of P) sc += ovl(box, [q.x - 4, q.y - 4, q.x + 4, q.y + 4]) * 4;
+        for (const o of trackBoxes) sc += ovl(box, o);
+        for (const [h, o] of bars) if (h !== g) { sc += ovl(box, o.box) * 3; if (o.lb) sc += ovl(box, o.lb) * 3; }
+        if (k === m.side) sc -= 10; // keep the current side unless another is clearly better
+        if (!best || sc < best.sc) best = { sc, k, dx, dy, box };
+      }
+      m.side = best.k; m.at = { x: m.x, y: m.y }; m.lb = best.box;
+      t.setAttribute('x', f1(best.dx)); t.setAttribute('y', f1(best.dy + 3)); t.setAttribute('text-anchor', 'middle');
+    }
     function place(g, L, p) {
       const q = point(L, p), n = L.stops.length - 1, a = point(L, Math.max(0, p - .03)), b = point(L, Math.min(n, p + .03)), body = g.querySelector('.body');
+      const ang = Math.atan2(b.y - a.y, b.x - a.x);
       g.setAttribute('transform', `translate(${f1(q.x)} ${f1(q.y)})`);
-      if (body) body.setAttribute('transform', `rotate(${f1(Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI)})`); // along the line
+      if (body) body.setAttribute('transform', `rotate(${f1(ang * 180 / Math.PI)})`); // along the line
+      for (const h of bars.keys()) if (!h.isConnected) bars.delete(h); // trains that left the map
+      const m = bars.get(g) || {}; m.x = q.x; m.y = q.y; m.box = [q.x - 7, q.y - 7, q.x + 7, q.y + 7]; bars.set(g, m);
+      placeNumber(g, m, ang);
     }
 
     // ---- you are here ----
@@ -183,7 +214,7 @@
     let station = null;
     function setStation(st) {
       if (station != null) { labels[station].classList.remove('me'); nodes[station].classList.remove('me'); }
-      if (st !== station) { station = st; labels[st].classList.add('me'); nodes[st].classList.add('me'); layout(); } // names re-placed around the new station
+      if (st !== station) { station = st; labels[st].classList.add('me'); nodes[st].classList.add('me'); layout(); bars.forEach(m => m.at = null); } // names re-placed around the new station; train numbers re-choose
       labels[st].classList.add('me'); nodes[st].classList.add('me');
       here.setAttribute('transform', `translate(${f1(P[st].x)} ${f1(P[st].y)})`);
       related(S.routes.filter(L => L.stops.includes(st)).map(L => L.id));
@@ -218,6 +249,7 @@
         let sc = (b[0] < 0 || b[2] > W || b[1] < 0 || b[3] > H ? 1e6 : 0) - (k === apSide ? 40 : 0); // a little stickiness, so it doesn't flicker
         for (const o of labelBoxes) sc += ov(b, o);
         for (const o of hereBoxes) sc += ov(b, o) * 6;
+        for (const o of bars.values()) { sc += ov(b, o.box) * 3; if (o.lb) sc += ov(b, o.lb) * 3; }
         if (!best || sc < best.sc) best = { sc, k };
       }
       apSide = best.k; const [x, y, a] = spots[apSide];
