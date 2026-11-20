@@ -96,7 +96,7 @@
     buildList();
   }
   function buildList() {
-    $('#pickLbl').replaceChildren(pickMode === 'dest' ? 'Where to?' : 'Set this screen\'s station', make('span', '', pickMode === 'dest' ? 'Tap a station below or anywhere on the map' : 'Trains, times and routes update for the station you pick'));
+    $('#pickLbl').replaceChildren(pickMode === 'dest' ? 'Where to?' : 'Your station', make('span', '', pickMode === 'dest' ? 'Tap a station below or anywhere on the map' : 'Trains, times and routes update for the station you pick'));
     $('#bStation').textContent = pickMode === 'dest' ? 'Change station' : 'Cancel';
     const ids = S.G.stops.map((_, i) => i).filter(s => pickMode === 'station' || s !== station).sort((a, b) => dn(a).localeCompare(dn(b)));
     $('#destList').replaceChildren(...ids.map(s => {

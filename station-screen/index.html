@@ -125,7 +125,7 @@ label, .lbl { display: block; font-size: 12px; letter-spacing: .18em; text-trans
 /* hint starts on the list's 2nd column (1 column + 1 gap) */
 .pick label span { position: absolute; left: calc((100% - 90px) / 6 + 18px); text-transform: none; letter-spacing: 0; opacity: .8; }
 #destList { margin-top: 14px; columns: 6; column-gap: 18px; }
-#destList button { display: block; width: 100%; text-align: left; font-size: 13px; line-height: 18px; opacity: .82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#destList button { display: block; width: 100%; break-inside: avoid; -webkit-column-break-inside: avoid; /* Safari otherwise splits a name across two columns */ text-align: left; font-size: 13px; line-height: 18px; opacity: .82; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #destList button:hover, #destList button:focus-visible { opacity: 1; outline: none; text-decoration: underline; text-underline-offset: 3px; }
 
 #rTitle { font-weight: 400; font-size: 40px; line-height: 1; margin: 8px 0 12px; letter-spacing: -.02em; }
