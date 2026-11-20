@@ -176,7 +176,7 @@
     const ovl = (a, b) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
     function placeNumber(g, m, ang) {
       const t = g.querySelector('.tl');
-      if (!t || !t.textContent || !(g.classList.contains('mine') || svg.classList.contains('hub'))) { m.lb = null; return; }
+      if (!t || !t.textContent || g.classList.contains('hide') || !(g.classList.contains('mine') || svg.classList.contains('hub'))) { m.lb = null; return; }
       if (m.at && Math.hypot(m.x - m.at.x, m.y - m.at.y) < 3 && m.lb) return;
       const w = t.getComputedTextLength() || t.textContent.length * 5, u = { x: Math.cos(ang), y: Math.sin(ang) }, v = { x: -u.y, y: u.x };
       const along = 9 + w / 2 * Math.abs(u.x) + 4 * Math.abs(u.y), across = 6 + w / 2 * Math.abs(v.x) + 4 * Math.abs(v.y);

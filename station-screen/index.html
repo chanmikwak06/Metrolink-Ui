@@ -48,6 +48,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .tr.mine .sm, #net.hub .tr .sm { display: none; }
 .tr.mine .big, .tr.mine .tl, #net.hub .tr .big, #net.hub .tr .tl { display: inline; }
 .tr.mine.sched .big, #net.hub .tr.sched .big { fill-opacity: .8; } .tr.stale, #net.hub .tr.stale { fill-opacity: .3; } .tr.hide, #net.hub .tr.hide { fill-opacity: 0; }
+.tr.hide .tl { display: none !important; } /* the approaching train is drawn by its own marker and "Train 131" label; its number would repeat it */
 .tr .tl { font-size: 8px; fill-opacity: .9; paint-order: stroke; stroke: var(--blue); stroke-width: 2px; }
 /* Train info card (tap a train): same blue, hairline border, the console's type */
 .tinfo { position: absolute; z-index: 3; min-width: 240px; box-sizing: border-box; padding: 12px 14px 10px; background: var(--blue); border: 1px solid rgba(255,255,255,.75); border-radius: 6px; font-size: 13px; line-height: 1.35; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
